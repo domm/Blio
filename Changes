@@ -6,6 +6,7 @@
 
 2005-02-04
 ----------
+* moved make_outdir into collect (less fuzz this way)
 * Finally made up my mind on what exactly is a node
 * added code to support this
 

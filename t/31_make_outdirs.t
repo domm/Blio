@@ -10,8 +10,8 @@ use Test::NoWarnings;
 use Blio;
 my $blio=Blio->new({basedir=>$base});
 $blio->read_config;
-$blio->collect;
-$blio->make_outdirs;
+#$blio->collect;
+#$blio->make_outdirs;
 
 my $outdir=$blio->outdir;
 use File::Spec;

@@ -18,7 +18,7 @@ use Blio::Node::Image;
 $Blio::VERSION='0.01';
 
 # generate accessors
-Blio->mk_accessors(qw(basedir config files dirs cats));
+Blio->mk_accessors(qw(basedir config cats));
 
 sub new {
     my $class=shift;
@@ -51,9 +51,8 @@ sub read_config {
 sub collect {
     my $self=shift;
     my $srcdir=$self->srcdir;
+    my $outdir=$self->outdir;
     
-    my @files;
-    my @dirs;
     my $ignore=$self->config->{ignore};
     my $ignore_re=join('|',@$ignore);
     
@@ -64,28 +63,16 @@ sub collect {
             $self->register_node($File::Find::name);
         } elsif (-d) {
             my $d=abs2rel($File::Find::name,$srcdir);
-            push(@dirs,$d);
+            my $od=catdir($outdir,$d);
+            unless (-e $od) {
+                mkdir($od) || croak ("Cannot create $od: $!");
+            }
         }
     };
     find($wanted,$srcdir);
 
-    $self->files(\@files);
-    $self->dirs(\@dirs);
 }
 
-
-sub make_outdirs {
-    my $self=shift;
-    my $outdir=$self->outdir;
-    my $dirs=$self->dirs;
-    foreach (@$dirs) {
-        my $d=catdir($outdir,$_);
-        unless (-e $d) {
-            mkdir($d) || croak ("Cannot create $d: $!");
-        }
-    }
-    return $self;
-}
 
 sub register_node {
     my $self=shift;
@@ -181,10 +168,6 @@ $blio->config.
 =head4 collect
 
 Traverse srcdir and collect the files and directories contained in it.
-
-=head4 make_outdirs
-
-Generate directory structure in outdir.
 
 =head4 register_category($cat)
 
