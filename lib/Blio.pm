@@ -6,13 +6,14 @@ use warnings;
 use base qw(Class::Accessor);
 
 use YAML qw(LoadFile);
-use File::Spec::Functions;
+use File::Spec::Functions qw(abs2rel catfile catdir);
 use Carp;
+use File::Find;
 
 $Blio::VERSION='0.01';
 
 # generate accessors
-Blio->mk_accessors(qw(basedir config));
+Blio->mk_accessors(qw(basedir config files dirs));
 
 
 sub read_config {
@@ -29,6 +30,65 @@ sub read_config {
 
     $self->config($config);
     return $self;
+}
+
+
+sub collect {
+    my $self=shift;
+    my $srcdir=$self->srcdir;
+    
+    my @files;
+    my @dirs;
+    my $ignore=$self->config->{ignore};
+    my $ignore_re=join('|',@$ignore);
+    
+    my $wanted=sub {
+        return if $File::Find::name=~/$ignore_re/;
+        return if /^\.+$/;
+        if (-f) {
+            #$self->register_node($File::Find::name);
+            push(@files,$File::Find::name);
+        } elsif (-d) {
+            my $d=abs2rel($File::Find::name,$srcdir);
+            push(@dirs,$d);
+        }
+    };
+    find($wanted,$srcdir);
+
+    $self->files(\@files);
+    $self->dirs(\@dirs);
+}
+
+
+sub make_outdirs {
+    my $self=shift;
+    my $outdir=$self->outdir;
+    my $dirs=$self->dirs;
+    foreach (@$dirs) {
+        my $d=catdir($outdir,$_);
+        unless (-e $d) {
+            mkdir($d) || croak ("Cannot create $d: $!");
+        }
+    }
+    return $self;
+}
+
+sub register_node {
+    my $self=shift;
+    my $srcpath=shift;
+
+    $srcpath=~/\.(\w+)$/;
+    my $extension=$1;
+
+    my $node;
+    if ($extension eq 'txt') {
+        $node=Blio::Node::Text->new($srcpath,$self);
+    } elsif ($extension =~ /jpg|jpeg|gif|png/) {
+        $node=Blio::Node::Image->new($srcpath,$self);
+
+    }
+        
+
 }
 
 
@@ -66,15 +126,31 @@ bloxsom/bryar ripoff I can actually understand/use.
 Reads the config file (blio.yaml) and stores the configuration in
 $blio->config.
 
+=head4 collect
+
+Traverse srcdir and collect the files and directories contained in it.
+
+=head4 make_outdirs
+
+Generate directory structure in outdir.
+
 =head3 Accessor Methods (via Class::Accessor)
 
 =head4 basedir
 
-Returns absolute path to basedir.
+Absolute path to basedir.
 
 =head4 config
 
-Returns the config data structur (blio.yaml).
+The config data structur (blio.yaml).
+
+=head4 files
+
+List of all absolute file paths to be processed
+
+=head4 dirs
+
+List of all directories, relative to out/src
 
 Returns
 

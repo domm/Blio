@@ -2,12 +2,12 @@
 Module:
 
 Blio	- base class
-Blio::Node	- eine node
 Blio::In	- base class fuer input
-Blio::In::File	- generiert nodes aus filesystem
-Blio::In::File::Complex	- anderer Parser
-Blio::In::RSS	- generiert nodes aus RSS stream
-Blio::In::...	- generiert nodes aus wasauchimmer
+Blio::Node	- node baseclass
+Blio::Node::File	- generiert nodes aus filesystem
+Blio::Node::File::Complex	- anderer Parser
+Blio::Node::RSS	- generiert nodes aus RSS stream
+Blio::Node::...	- generiert nodes aus wasauchimmer
 Blio::Out	- schreibt nodes ins outdir
 Blio::Out::...	- ev verschiedene arten von output, zB RSS?
 Blio::Install	- installiert eine neue instanz

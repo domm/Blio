@@ -13,7 +13,6 @@ if (-e $base) {
     use File::Path;
     $rv=rmtree($base);
 }
-
 cmp_ok($rv,'>=',1,'deleted test environ');
 
 
