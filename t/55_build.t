@@ -4,16 +4,15 @@ my $build=Module::Build->current;
 my $base=$build->notes('base');
 plan skip_all=>'test environment not set up' unless $base;
 
-plan tests=>6;
+plan tests=>1;
 use Test::NoWarnings;
+use Test::Deep;
 
 use Blio;
 my $blio=Blio->new({basedir=>$base});
+$blio->read_config;
 
-is($blio->basedir,$base,'basedir');
-like($blio->outdir,qr/\/out$/,'outdir');
-like($blio->srcdir,qr/\/src$/,'srcdir');
-like($blio->tpldir,qr/\/templates$/,'tpldir');
-like($blio->configfile,qr/\/blio.yaml$/,'configfile');
+$blio->collect;
+$blio->build;
 
 
