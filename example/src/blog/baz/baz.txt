@@ -1,3 +1,0 @@
-baz
-
-this is a baz
