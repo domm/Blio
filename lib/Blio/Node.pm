@@ -9,7 +9,7 @@ use Carp;
 use File::Spec::Functions qw(catdir catfile abs2rel);
 
 # generate accessors
-Blio::Node->mk_accessors(qw(srcpath basename title text date cat ));
+Blio::Node->mk_accessors(qw(srcpath basename title text date cat));
 
 
 sub outpath {
@@ -26,6 +26,35 @@ sub url {
     my $self=shift;
     return join('/','',$self->cat,$self->basename.".html");
 
+}
+
+sub print {
+    my $self=shift;
+    my $blio=Blio->instance;
+    print STDERR "# ".$self->url. " $self blio: $blio ".$blio->outdir."\n";
+    my $tt=$blio->tt;
+    $tt->process(
+        'node',
+        {
+            node=>$self,
+            blio=>$blio,
+        },
+        $self->url
+    ) || die "#". $tt->error;
+    
+}   
+
+sub parse {
+    my $self=shift;
+
+    # open srcfile
+    # read it
+    # text2html
+    # store data
+    # handle_image (nur bei Txt)
+    
+    # oder besser in jeder Node extra?
+    # vor allem Dir und Sub nodes muessen ja einiges extra machen
 }
 
 

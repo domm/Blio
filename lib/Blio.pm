@@ -9,6 +9,7 @@ use YAML qw(LoadFile);
 use File::Spec::Functions qw(abs2rel catfile catdir splitpath splitdir);
 use Carp;
 use File::Find;
+use Template;
 
 use Blio::Node;
 use Blio::Node::Dir;
@@ -18,7 +19,7 @@ use Blio::Node::Image;
 $Blio::VERSION='0.01';
 
 # generate accessors
-Blio->mk_accessors(qw(basedir config cats));
+Blio->mk_accessors(qw(basedir config cats _tt));
 
 sub new {
     # return the singleton
@@ -32,7 +33,6 @@ sub _new_instance {
     $data->{cats}={root=>[],};
     
     return bless $data,$class;
-    
 }
 
 
@@ -91,7 +91,9 @@ sub register_node {
     if ($dir[-1] eq '') {  # File::Spec::splitdir might return an empty
         pop(@dir);         # dir name; remove it
     }
-    return if @dir>2;
+
+    # currently, Blio doesn't support nested categories
+    return if @dir>2; 
 
     my $cat=$dir[0] || 'root';
     $self->register_category($cat);
@@ -117,13 +119,14 @@ sub register_node {
     return unless $nodeclass;
     $nodeclass='Blio::Node::'.$nodeclass;
     
-    my $node=$nodeclass->new({srcpath=>$srcpath,cat=>$cat,basename=>$basename});
+    my $node=$nodeclass->new({
+        srcpath=>$srcpath,
+        cat=>$cat,
+        basename=>$basename,
+    });
+    $node->parse;
     push(@{$self->cats->{$cat}},$node);
-    
     return;
-
-    
-
 }
 
 
@@ -135,8 +138,37 @@ sub register_category {
     $cats->{$cat}=[];
 }
 
+sub all_nodes {
+    my $self=shift;
+    my $cats=$self->cats;
+    my @all=map { @$_ } values %$cats;
+    return wantarray ? @all : \@all;
+}
+
+sub build {
+    my $self=shift;
+
+    foreach my $node ($self->all_nodes) {
+        $node->print;
+    }
+}
+
+sub tt {
+    my $self=shift;
+    return $self->_tt if $self->_tt;
+
+    my $tt=Template->new({
+        INCLUDE_PATH=>$self->tpldir,
+        OUTPUT_PATH=>$self->outdir,
+        WRAPPER=>'wrapper',
+    });
+    $self->_tt($tt);
+    return $tt;
+}
+
 sub outdir { return catdir(shift->basedir,'out') }
 sub srcdir { return catdir(shift->basedir,'src') }
+sub tpldir { return catdir(shift->basedir,'templates') }
 sub configfile { return catfile(shift->basedir,'blio.yaml') }
 
 8;
@@ -184,6 +216,28 @@ Registers a new category. If the category already exists, does nothing;
 Figures out what kind of node the $srcpath points to. Generates a fitting
 Blio::Node::* object and registers the node in the node registry.
 
+=head4 build
+
+Fetch all nodes and generate an HTML page in outdir for each node.
+
+=head3 Accessor Methods
+
+=head4 outdir
+
+Returns absolute path to outdir.
+
+=head4 srcdir
+
+Returns absolute path to srcdir.
+
+=head4 configfile
+
+Returns absolute path to configfile (blio.yaml).
+
+=head4 all_nodes
+
+Retruns an arrayref of all nodes
+
 =head3 Accessor Methods (via Class::Accessor)
 
 =head4 basedir
@@ -201,22 +255,6 @@ List of all absolute file paths to be processed
 =head4 dirs
 
 List of all directories, relative to out/src
-
-Returns
-
-=head3 Special Accessor Methods
-
-=head4 outdir
-
-Returns absolute path to outdir.
-
-=head4 srcdir
-
-Returns absolute path to srcdir.
-
-=head4 configfile
-
-Returns absolute path to configfile (blio.yaml).
 
 =head1 BUGS
 
