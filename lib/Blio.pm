@@ -24,7 +24,7 @@ sub new {
     my $class=shift;
     my $data=shift;
     croak("please pass a hashref to new") unless ref($data) eq 'HASH';
-    $data->{cats}={root=>{},};
+    $data->{cats}={root=>[],};
     
     return bless $data,$class;
     
@@ -112,7 +112,7 @@ sub register_node {
     print "$nodeclass\n";
     
     my $node=$nodeclass->new({srcpath=>$srcpath});
-
+    push(@{$self->cats->{$cat}},$node);
     
     return;
 
@@ -126,7 +126,7 @@ sub register_category {
     my $cat=shift;
     my $cats=$self->cats;
     return if $cats->{$cat};
-    $cats->{$cat}={};
+    $cats->{$cat}=[];
 }
 
 sub outdir { return catdir(shift->basedir,'out') }

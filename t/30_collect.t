@@ -4,7 +4,7 @@ my $build=Module::Build->current;
 my $base=$build->notes('base');
 plan skip_all=>'test environment not set up' unless $base;
 
-plan tests=>6;
+plan tests=>8;
 use Test::NoWarnings;
 use Test::Deep;
 
@@ -28,5 +28,9 @@ my $cats=$blio->cats;
 my @catkeys=keys %$cats;
 is(scalar @catkeys,2,'num cats');
 cmp_bag(\@catkeys,[qw(root blog)],'cats');
+
+is(scalar @{$cats->{root}},0,'no nodes in root');
+is(scalar @{$cats->{blog}},5,'5 nodes in root');
+# 
 
 
