@@ -1,4 +1,4 @@
---- #YAML:1.0
-basedir: '/home/domm/perl/Blio/example'
-ignore: ['\.svn']
-
+---
+basedir: /home/domm/perl/Blio/example
+ignore:
+  - \.svn
