@@ -8,7 +8,11 @@ my $builder = Module::Build->new(
     dist_author         => 'Thomas Klausner <domm@zsi.at>',
     dist_version_from   => 'lib/Blio.pm',
     requires => {
+        'YAML'=>0.36,
+        
+        # for testing
         'Test::More' => 0,
+        'File::Copy::Recursive'=> 0.04,
     },
     add_to_cleanup      => [ 'Blio-*' ],
     create_makefile     => 'passthrough',
@@ -22,7 +26,7 @@ I will copy some file into this directory, run various tests on them,
 and remove them afterwards.
     
 If you specifiy an empty values, a lot of tests won't be run.
-",'/temp');
+",'/tmp/blio');
 $builder->notes(base=>$base);
 
 $builder->create_build_script();
