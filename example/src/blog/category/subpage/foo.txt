@@ -1,3 +1,0 @@
-Finally Foo!
-
-What would a test suite be without a foo in it
