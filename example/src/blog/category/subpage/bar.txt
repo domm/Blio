@@ -1,0 +1,4 @@
+Bar!
+
+To testsuite witout a bar
+
