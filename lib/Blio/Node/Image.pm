@@ -5,14 +5,38 @@ use warnings;
 
 use base qw(Blio::Node);
 use Carp;
+use File::Copy;
+use File::Spec::Functions qw(catdir catfile abs2rel);
+
+__PACKAGE__->mk_accessors(qw(image thumbnail width height th_width th_height));
 
 
+#----------------------------------------------------------------
+# parse
+#----------------------------------------------------------------
+sub parse {
+    my $self=shift;
+    
+    print "parse img ".$self->srcpath."\n"; 
 
+    my $title=$self->basename;
+    $title=~s/_/ /g;
+    
+    $self->title($title);
+    $self->image($self->srcfile);
 
+    my $path=abs2rel($self->srcpath,Blio->instance->srcdir);
+    my $target=catfile(Blio->instance->outdir,$path);   
+    copy($self->srcpath,$target);
+    
+    # make thumbnail
+    
+    return;
+}
+
+sub template { 'image' }
 
 8;
-
-
 __END__
 
 =pod

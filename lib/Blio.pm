@@ -10,6 +10,7 @@ use File::Spec::Functions qw(abs2rel catfile catdir splitpath splitdir);
 use Carp;
 use File::Find;
 use Template;
+use DateTime;
 
 use Blio::Node;
 use Blio::Node::Dir;
@@ -21,11 +22,18 @@ $Blio::VERSION='0.01';
 # generate accessors
 Blio->mk_accessors(qw(basedir config cats _tt));
 
+
+#----------------------------------------------------------------
+# new
+#----------------------------------------------------------------
 sub new {
     # return the singleton
     return shift->instance(@_);
 }
 
+#----------------------------------------------------------------
+# _new_instance
+#----------------------------------------------------------------
 sub _new_instance {
     my $class=shift;
     my $data=shift;
@@ -36,6 +44,9 @@ sub _new_instance {
 }
 
 
+#----------------------------------------------------------------
+# read_conf
+#----------------------------------------------------------------
 sub read_config {
     my $self=shift;
     my $configfile=$self->configfile;
@@ -53,6 +64,9 @@ sub read_config {
 }
 
 
+#----------------------------------------------------------------
+# collect
+#----------------------------------------------------------------
 sub collect {
     my $self=shift;
     my $srcdir=$self->srcdir;
@@ -79,6 +93,9 @@ sub collect {
 }
 
 
+#----------------------------------------------------------------
+# register_node
+#----------------------------------------------------------------
 sub register_node {
     my $self=shift;
     my $srcpath=shift;
@@ -97,6 +114,8 @@ sub register_node {
 
     my $cat=$dir[0] || 'root';
     $self->register_category($cat);
+    
+    my $srcfile=$f;
    
     $f=~/^(.*)\.(.*?)$/;
     my $basename=$1;
@@ -105,15 +124,16 @@ sub register_node {
     my $nodeclass;
     if (@dir == 2) {
         if ($f eq 'node.txt') {
-            $nodeclass='Dir'
+            $nodeclass='Dir';
+            $basename=$dir[1];
         } elsif ($ext eq 'txt') {
-            #$nodeclass='Sub'
+            #$nodeclass='Sub';
         }   
     } else {
         if ($ext eq 'txt') {
-            $nodeclass='Txt'
+            $nodeclass='Txt';
         } elsif ($ext=~/^(jpg|jpeg|gif|png)$/) {
-            $nodeclass='Image'
+            $nodeclass='Image';
         }
     }
     return unless $nodeclass;
@@ -123,6 +143,7 @@ sub register_node {
         srcpath=>$srcpath,
         cat=>$cat,
         basename=>$basename,
+        srcfile=>$srcfile,
     });
     $node->parse;
     push(@{$self->cats->{$cat}},$node);
@@ -130,6 +151,9 @@ sub register_node {
 }
 
 
+#----------------------------------------------------------------
+# register_category
+#----------------------------------------------------------------
 sub register_category {
     my $self=shift;
     my $cat=shift;
@@ -138,6 +162,9 @@ sub register_category {
     $cats->{$cat}=[];
 }
 
+#----------------------------------------------------------------
+# all_nodes
+#----------------------------------------------------------------
 sub all_nodes {
     my $self=shift;
     my $cats=$self->cats;
@@ -145,14 +172,34 @@ sub all_nodes {
     return wantarray ? @all : \@all;
 }
 
+#----------------------------------------------------------------
+# build
+#----------------------------------------------------------------
 sub build {
     my $self=shift;
 
-    foreach my $node ($self->all_nodes) {
-        $node->print;
+
+    while (my ($cat,$nodes)=each %{$self->cats}) {
+        print "cat $cat\n";
+        foreach my $node (@$nodes) {
+            $node->print;
+        }
+
+        my $tt=$self->tt;
+        $tt->process(
+            'category',
+            {
+                cat=>$cat,
+                nodes=>$nodes,
+            },
+            catfile($cat,'/index.html')
+        ) || die $tt->error;
     }
 }
 
+#----------------------------------------------------------------
+# tt
+#----------------------------------------------------------------
 sub tt {
     my $self=shift;
     return $self->_tt if $self->_tt;
@@ -166,6 +213,9 @@ sub tt {
     return $tt;
 }
 
+#----------------------------------------------------------------
+# Accessor Methods
+#----------------------------------------------------------------
 sub outdir { return catdir(shift->basedir,'out') }
 sub srcdir { return catdir(shift->basedir,'src') }
 sub tpldir { return catdir(shift->basedir,'templates') }
@@ -191,6 +241,56 @@ hmm...
 ttree on steroids.
 
 bloxsom/bryar ripoff I can actually understand/use.
+
+=head2 Overview
+
+Blio converts src files which are stored in the srcdir into html documents.
+
+=head2 Configuration
+
+The configuration is stored in the file F<blio.yaml> in the root dir of your Blio installation.
+
+=head3 basedir
+
+Absolute path to your Blio installation.
+
+=head3 image_resizer
+
+The name of the class to handle image resizing / thumbnailing.
+
+=head3 image_width
+
+The width (in pixel) of a thumbnail.
+
+=head3 ignore
+
+A list of regexes. Files matching this regexes are ignored by Blio.
+
+=head2 Structure of srcdir
+
+The srcdir can contain any number of directories. Each of this directories makes up a L<category>. A catgeory is a container of nodes.
+
+Each category can contain any number of nodes.
+
+A Node is any of:
+
+=over
+
+=item * a textfile
+
+F<some_file.txt>
+
+A textfile will be parsed and converted to an html page.
+
+=item * an image
+
+F<some_image.jpg>
+
+For a standalone image an html page will be generated which displays the image as-is (i.e. without thumbnailing). The filename of the image will be used as the title of the page.
+
+=item * a directory containing a file called F<node.txt> and a number of images
+
+=item * a directory containing a file called F<node.txt> and a number of text files and a number of images
 
 =head2 METHODS
 

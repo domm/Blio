@@ -8,6 +8,7 @@ use Carp;
 
 
 
+sub template { 'node' }
 
 
 8;

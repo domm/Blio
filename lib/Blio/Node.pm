@@ -9,44 +9,50 @@ use Carp;
 use File::Spec::Functions qw(catdir catfile abs2rel);
 
 # generate accessors
-Blio::Node->mk_accessors(qw(srcpath basename title text date cat));
+Blio::Node->mk_accessors(qw(srcpath srcfile basename title text date cat template));
 
 
-sub outpath {
-    my $self=shift;
-    if ($self->{outpath}) {
-        return $self->outpath;
-    }
-    my $srcpath=$self->srcpath;
-    my $outdir=Blio->instance->outdir;
-    return catfile($outdir,$self->cat,$self->basename.".html");
+#----------------------------------------------------------------
+# new
+#----------------------------------------------------------------
+sub new {
+    my $class=shift;
+    my $data=shift;
+
+    my $self=bless $data,$class;
+    my $mtime=(stat($self->srcpath))[9];
+    $self->date(DateTime->from_epoch(epoch=>$mtime));
+
+    return $self;
 }
 
-sub url {
-    my $self=shift;
-    return join('/','',$self->cat,$self->basename.".html");
-
-}
-
+#----------------------------------------------------------------
+# print
+#----------------------------------------------------------------
 sub print {
     my $self=shift;
     my $blio=Blio->instance;
-    print STDERR "# ".$self->url. " $self blio: $blio ".$blio->outdir."\n";
+    print $self->absurl."\n";
     my $tt=$blio->tt;
     $tt->process(
-        'node',
+        $self->template,
         {
             node=>$self,
             blio=>$blio,
         },
-        $self->url
-    ) || die "#". $tt->error;
+        $self->absurl
+    ) || die $tt->error;
     
 }   
 
+#----------------------------------------------------------------
+# parse
+#----------------------------------------------------------------
 sub parse {
     my $self=shift;
 
+    print "base parse ".$self->srcpath."\n";
+    
     # open srcfile
     # read it
     # text2html
@@ -57,6 +63,52 @@ sub parse {
     # vor allem Dir und Sub nodes muessen ja einiges extra machen
 }
 
+#----------------------------------------------------------------
+# outpath
+#----------------------------------------------------------------
+sub outpath {
+    my $self=shift;
+    if ($self->{outpath}) {
+        return $self->outpath;
+    }
+    my $srcpath=$self->srcpath;
+    my $outdir=Blio->instance->outdir;
+    return catfile($outdir,$self->cat,$self->basename.".html");
+}
+
+#----------------------------------------------------------------
+# absurl
+#----------------------------------------------------------------
+sub absurl {
+    my $self=shift;
+    return join('/','',$self->cat,$self->basename.".html");
+}
+
+#----------------------------------------------------------------
+# relurl
+#----------------------------------------------------------------
+sub relurl {
+    my $self=shift;
+    return $self->basename.".html";
+}
+
+#----------------------------------------------------------------
+# filename
+#----------------------------------------------------------------
+sub filename {
+    my $self=shift;
+    my $src=$self;
+}
+
+#----------------------------------------------------------------
+# mtime
+#----------------------------------------------------------------
+sub mtime {
+    my $self=shift;
+    my $date=$self->date;
+    return DateTime->now unless $date;
+    return $date->epoch;
+}
 
 8;
 
