@@ -1,0 +1,49 @@
+
+Module:
+
+Blio	- base class
+Blio::Node	- eine node
+Blio::In	- base class fuer input
+Blio::In::File	- generiert nodes aus filesystem
+Blio::In::File::Complex	- anderer Parser
+Blio::In::RSS	- generiert nodes aus RSS stream
+Blio::In::...	- generiert nodes aus wasauchimmer
+Blio::Out	- schreibt nodes ins outdir
+Blio::Out::...	- ev verschiedene arten von output, zB RSS?
+Blio::Install	- installiert eine neue instanz
+Blio::Plugin::Htmlify/Text2Html..	- verschieden txt2html module
+Blio::Plugin::Imager	- image handling mit imager
+Blio::Plugin::ImageMagick	- image handling mit imageMagick
+
+
+
+
+
+
+
+eine installation schaut aus wie folgt:
+
+src/
+   entry.txt
+   entry2.txt
+   entry2_1.jpg
+   entry2_2.jpg
+   entry3/
+
+
+
+templates/
+   blio/
+   custom/
+      type1/
+      type2/
+
+out/
+   entry/index.html
+   entry2/index.html
+          entry2_1.jpg
+	  entry2_2.jpg
+
+
+
+

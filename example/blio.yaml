@@ -1,0 +1,5 @@
+
+# this should be set during perl Build.PL or something...
+basedir: /home/domm/Blio/example
+
+
