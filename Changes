@@ -6,6 +6,7 @@
 
 2005-02-02
 ----------
+* renamed test files (to make place for tests that don't need the test env)
 * imported into svn
 * set up test environment during testing
 
