@@ -4,7 +4,7 @@ my $build=Module::Build->current;
 my $base=$build->notes('base');
 plan skip_all=>'test environment not set up' unless $base;
 
-plan tests=>8;
+plan tests=>10;
 use Test::NoWarnings;
 use Test::Deep;
 
@@ -16,12 +16,12 @@ $blio->collect;
 
 my $outdir=$blio->outdir;
 
-use File::Spec;
+use File::Spec::Functions qw(catdir catfile);
 
 # OUTDIRS
-ok(-e File::Spec->catdir($outdir,'blog'),'outdir blog');
-ok(-e File::Spec->catdir($outdir,'blog','page_with_images'),'outdir blog/page_with_images');
-ok(-e File::Spec->catdir($outdir,'blog','page_with_subpages'),'outdir blog/page_with_subpages');
+ok(-e catdir($outdir,'blog'),'outdir blog');
+ok(-e catdir($outdir,'blog','page_with_images'),'outdir blog/page_with_images');
+ok(-e catdir($outdir,'blog','page_with_subpages'),'outdir blog/page_with_subpages');
 
 # CATEGORIES
 my $cats=$blio->cats;
@@ -31,6 +31,12 @@ cmp_bag(\@catkeys,[qw(root blog)],'cats');
 
 is(scalar @{$cats->{root}},0,'no nodes in root');
 is(scalar @{$cats->{blog}},5,'5 nodes in root');
-# 
 
+
+# NODES 
+{
+    my $node=$cats->{blog}[0];
+    is($node->outpath,catfile($base,'out','blog','standalone_image.html'),'outpath');
+    is($node->url,'/blog/standalone_image.html','url');
+}
 

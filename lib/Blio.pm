@@ -3,7 +3,7 @@ package Blio;
 use strict;
 use warnings;
 
-use base qw(Class::Accessor);
+use base qw(Class::Accessor Class::Singleton);
 
 use YAML qw(LoadFile);
 use File::Spec::Functions qw(abs2rel catfile catdir splitpath splitdir);
@@ -21,6 +21,11 @@ $Blio::VERSION='0.01';
 Blio->mk_accessors(qw(basedir config cats));
 
 sub new {
+    # return the singleton
+    return shift->instance(@_);
+}
+
+sub _new_instance {
     my $class=shift;
     my $data=shift;
     croak("please pass a hashref to new") unless ref($data) eq 'HASH';
@@ -87,31 +92,32 @@ sub register_node {
         pop(@dir);         # dir name; remove it
     }
     return if @dir>2;
-    print "$v - $d: ".join(',',@dir)." - $f \n";
-    #push(@files,$srcpath);
 
     my $cat=$dir[0] || 'root';
     $self->register_category($cat);
+   
+    $f=~/^(.*)\.(.*?)$/;
+    my $basename=$1;
+    my $ext=$2;
     
     my $nodeclass;
     if (@dir == 2) {
         if ($f eq 'node.txt') {
             $nodeclass='Dir'
-        } elsif ($f=~/\.txt$/) {
+        } elsif ($ext eq 'txt') {
             #$nodeclass='Sub'
         }   
     } else {
-        if ($f=~/\.txt$/) {
+        if ($ext eq 'txt') {
             $nodeclass='Txt'
-        } elsif ($f=~/\.(jpg|jpeg|gif|png)$/) {
+        } elsif ($ext=~/^(jpg|jpeg|gif|png)$/) {
             $nodeclass='Image'
         }
     }
     return unless $nodeclass;
     $nodeclass='Blio::Node::'.$nodeclass;
-    print "$nodeclass\n";
     
-    my $node=$nodeclass->new({srcpath=>$srcpath});
+    my $node=$nodeclass->new({srcpath=>$srcpath,cat=>$cat,basename=>$basename});
     push(@{$self->cats->{$cat}},$node);
     
     return;
