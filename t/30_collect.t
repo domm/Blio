@@ -4,7 +4,7 @@ my $build=Module::Build->current;
 my $base=$build->notes('base');
 plan skip_all=>'test environment not set up' unless $base;
 
-plan tests=>3;
+plan tests=>2;
 use Test::NoWarnings;
 
 use Blio;
@@ -13,8 +13,8 @@ $blio->read_config;
 
 $blio->collect;
 
-my $files=$blio->files;
+#my $files=$blio->files;
 my $dirs=$blio->dirs;
-is(scalar @$files,4,'num files');
-is(scalar @$dirs,2,'num dirs');
+#is(scalar @$files,4,'num files');
+is(scalar @$dirs,3,'num dirs');
 

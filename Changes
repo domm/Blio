@@ -4,6 +4,12 @@
 # $Date: 2005-01-25 14:48:56 +0100 (Tue, 25 Jan 2005) $ 
 #-----------------------------------------------------------------
 
+2005-02-04
+----------
+* Finally made up my mind on what exactly is a node
+* added code to support this
+
+
 2005-02-03
 ----------
 * more test/example data

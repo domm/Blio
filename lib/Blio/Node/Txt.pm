@@ -1,15 +1,13 @@
-package Blio::Node;
+package Blio::Node::Txt;
 
 use strict;
 use warnings;
 
-use base qw(Class::Accessor);
-
+use base qw(Blio::Node);
 use Carp;
 
 
-# generate accessors
-Blio->mk_accessors(qw(srcpath outpath url title text date parent childs));
+
 
 
 8;
@@ -21,7 +19,7 @@ __END__
 
 =head1 NAME
 
-Blio::Node - Node Base Class
+Blio::Node::Dir - Node from dir
 
 =head1 SYNOPSIS
 

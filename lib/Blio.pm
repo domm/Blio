@@ -6,14 +6,29 @@ use warnings;
 use base qw(Class::Accessor);
 
 use YAML qw(LoadFile);
-use File::Spec::Functions qw(abs2rel catfile catdir);
+use File::Spec::Functions qw(abs2rel catfile catdir splitpath splitdir);
 use Carp;
 use File::Find;
+
+use Blio::Node;
+use Blio::Node::Dir;
+use Blio::Node::Txt;
+use Blio::Node::Image;
 
 $Blio::VERSION='0.01';
 
 # generate accessors
-Blio->mk_accessors(qw(basedir config files dirs));
+Blio->mk_accessors(qw(basedir config files dirs cats));
+
+sub new {
+    my $class=shift;
+    my $data=shift;
+    croak("please pass a hashref to new") unless ref($data) eq 'HASH';
+    $data->{cats}={root=>{},};
+    
+    return bless $data,$class;
+    
+}
 
 
 sub read_config {
@@ -46,8 +61,7 @@ sub collect {
         return if $File::Find::name=~/$ignore_re/;
         return if /^\.+$/;
         if (-f) {
-            #$self->register_node($File::Find::name);
-            push(@files,$File::Find::name);
+            $self->register_node($File::Find::name);
         } elsif (-d) {
             my $d=abs2rel($File::Find::name,$srcdir);
             push(@dirs,$d);
@@ -76,21 +90,57 @@ sub make_outdirs {
 sub register_node {
     my $self=shift;
     my $srcpath=shift;
+    my $srcdir=$self->srcdir;
 
-    $srcpath=~/\.(\w+)$/;
-    my $extension=$1;
-
-    my $node;
-    if ($extension eq 'txt') {
-        $node=Blio::Node::Text->new($srcpath,$self);
-    } elsif ($extension =~ /jpg|jpeg|gif|png/) {
-        $node=Blio::Node::Image->new($srcpath,$self);
-
+    my $abs=$srcpath;
+    my $rel=abs2rel($srcpath,$srcdir);
+    my ($v,$d,$f)=splitpath($rel);
+    my @dir=splitdir($d);
+    if ($dir[-1] eq '') {  # File::Spec::splitdir might return an empty
+        pop(@dir);         # dir name; remove it
     }
-        
+    return if @dir>2;
+    print "$v - $d: ".join(',',@dir)." - $f \n";
+    #push(@files,$srcpath);
+
+    my $cat=$dir[0] || 'root';
+    $self->register_category($cat);
+    
+    my $nodeclass;
+    if (@dir == 2) {
+        if ($f eq 'node.txt') {
+            $nodeclass='Dir'
+        } elsif ($f=~/\.txt$/) {
+            #$nodeclass='Sub'
+        }   
+    } else {
+        if ($f=~/\.txt$/) {
+            $nodeclass='Txt'
+        } elsif ($f=~/\.(jpg|jpeg|gif|png)$/) {
+            $nodeclass='Image'
+        }
+    }
+    return unless $nodeclass;
+    $nodeclass='Blio::Node::'.$nodeclass;
+    print "$nodeclass\n";
+    
+    my $node=$nodeclass->new({srcpath=>$srcpath});
+
+    
+    return;
+
+    
 
 }
 
+
+sub register_category {
+    my $self=shift;
+    my $cat=shift;
+    my $cats=$self->cats;
+    return if $cats->{$cat};
+    $cats->{$cat}={};
+}
 
 sub outdir { return catdir(shift->basedir,'out') }
 sub srcdir { return catdir(shift->basedir,'src') }
@@ -119,7 +169,9 @@ bloxsom/bryar ripoff I can actually understand/use.
 
 =head2 METHODS
 
-=head3 Setup Methods
+=head4 new
+
+Creates a new Blio object.
 
 =head4 read_config
 
@@ -133,6 +185,15 @@ Traverse srcdir and collect the files and directories contained in it.
 =head4 make_outdirs
 
 Generate directory structure in outdir.
+
+=head4 register_category($cat)
+
+Registers a new category. If the category already exists, does nothing;
+
+=head4 register_node($srcpath)
+
+Figures out what kind of node the $srcpath points to. Generates a fitting
+Blio::Node::* object and registers the node in the node registry.
 
 =head3 Accessor Methods (via Class::Accessor)
 
