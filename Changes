@@ -6,7 +6,10 @@
 
 2005-02-02
 ----------
+* more tests
+* teardown test env after testing
+* set basedir in example/blio.yaml to dir it actually is located
 * renamed test files (to make place for tests that don't need the test env)
-* imported into svn
 * set up test environment during testing
+* imported into svn
 

@@ -10,16 +10,14 @@ eval {
 };
 Test::More->builder->BAILOUT('File::Copy::Recursive neede for testsuite but seems to be missing') if $@;
 
-plan tests=>2;
+plan tests=>3;
 
 use File::Spec::Functions;
 if (-e $base) {
-diag('del');
     use File::Path;
     my $rvrm=rmtree($base);
     cmp_ok($rvrm,'>=',1,'delete test environ');
 } else {
-    diag('create');
     my $rvmd=mkdir($base);
     is($rvmd,1,'mkdir $base');
 }
@@ -27,4 +25,15 @@ diag('del');
 
 my $rv=dircopy("example",$base);
 cmp_ok($rv,'>=',1,'copy test environ');
+
+# change setting in $base/blio.yaml
+eval {
+    use File::Spec::Functions;
+    use YAML qw(LoadFile DumpFile);
+    my $cf=catfile($base,'blio.yaml');
+    my $c=LoadFile($cf);
+    $c->{basedir}=$base;
+    DumpFile($cf,$c);
+};
+is($@,'','test yaml rewritten');
 

@@ -1,5 +1,2 @@
-
-# this should be set during perl Build.PL or something...
-basedir: /home/domm/Blio/example
-
-
+--- #YAML:1.0
+basedir: '/home/domm/perl/Blio/example'

@@ -19,7 +19,6 @@ my $builder = Module::Build->new(
     create_readme       => 1,
 );
 
-#my $thisdir=$builder->base_dir."/";
 my $base=$builder->prompt("
 Please enter a writable directory where I can install a test enviroment.
 I will copy some file into this directory, run various tests on them,
@@ -28,6 +27,19 @@ and remove them afterwards.
 If you specifiy an empty values, a lot of tests won't be run.
 ",'/tmp/blio');
 $builder->notes(base=>$base);
+
+
+my $thisdir=$builder->base_dir."/";
+eval {
+    use File::Spec::Functions;
+    use YAML qw(LoadFile DumpFile);
+    my $cf=catfile($thisdir,'example','blio.yaml');
+    my $c=LoadFile($cf);
+    $c->{basedir}=catdir($thisdir,'example');
+    DumpFile($cf,$c);
+};
+
+
 
 $builder->create_build_script();
 
