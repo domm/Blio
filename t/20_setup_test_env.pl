@@ -14,10 +14,12 @@ plan tests=>2;
 
 use File::Spec::Functions;
 if (-e $base) {
+diag('del');
     use File::Path;
     my $rvrm=rmtree($base);
     cmp_ok($rvrm,'>=',1,'delete test environ');
 } else {
+    diag('create');
     my $rvmd=mkdir($base);
     is($rvmd,1,'mkdir $base');
 }
