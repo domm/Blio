@@ -1,0 +1,9 @@
+url [% node.url %]
+cat [% node.cat %]
+date [% node.date %]
+
+<h1>[% node.title %]</h1>
+
+[% node.text %]
+
+
