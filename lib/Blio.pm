@@ -112,6 +112,10 @@ sub register_node {
     # currently, Blio doesn't support nested categories
     return if @dir>2; 
 
+    # if it's in a subdir, ignore it, as subnodes are handled by the parent
+    # node
+    return if @dir>1;
+    
     my $cat=$dir[0] || 'root';
     $self->register_category($cat);
     
@@ -120,22 +124,14 @@ sub register_node {
     $f=~/^(.*)\.(.*?)$/;
     my $basename=$1;
     my $ext=$2;
-    
     my $nodeclass;
-    if (@dir == 2) {
-        if ($f eq 'node.txt') {
-            $nodeclass='Dir';
-            $basename=$dir[1];
-        } elsif ($ext eq 'txt') {
-            #$nodeclass='Sub';
-        }   
-    } else {
-        if ($ext eq 'txt') {
-            $nodeclass='Txt';
-        } elsif ($ext=~/^(jpg|jpeg|gif|png)$/) {
-            $nodeclass='Image';
-        }
+    
+    if ($ext eq 'txt') {
+        $nodeclass='Txt';
+    } elsif ($ext=~/^(jpg|jpeg|gif|png)$/) {
+        $nodeclass='Image';
     }
+    
     return unless $nodeclass;
     $nodeclass='Blio::Node::'.$nodeclass;
     
@@ -282,15 +278,17 @@ F<some_file.txt>
 
 A textfile will be parsed and converted to an html page.
 
+=item * a textfile with a dir with the same name containing images
+
+=item * a textfile with a dir with the same name containing more text files
+
 =item * an image
 
 F<some_image.jpg>
 
 For a standalone image an html page will be generated which displays the image as-is (i.e. without thumbnailing). The filename of the image will be used as the title of the page.
 
-=item * a directory containing a file called F<node.txt> and a number of images
-
-=item * a directory containing a file called F<node.txt> and a number of text files and a number of images
+=back
 
 =head2 METHODS
 
@@ -330,13 +328,17 @@ Returns absolute path to outdir.
 
 Returns absolute path to srcdir.
 
+=head4 tpldir
+
+Returns absolute path to dir containing templates.
+
 =head4 configfile
 
 Returns absolute path to configfile (blio.yaml).
 
 =head4 all_nodes
 
-Retruns an arrayref of all nodes
+Returns an arrayref of all nodes
 
 =head3 Accessor Methods (via Class::Accessor)
 
@@ -347,6 +349,10 @@ Absolute path to basedir.
 =head4 config
 
 The config data structur (blio.yaml).
+
+=head4 tt
+
+Returns a Template::Toolkit object.
 
 =head4 files
 

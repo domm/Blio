@@ -1,6 +1,7 @@
 
 
-* Txt und Image Nodes ordentlich implementieren (inkl listen, sortierung, doks, tests)
+* Txt und Image Nodes ordentlich implementieren (inkl listen, sortierung, doks, tests). d.h.:
+  - templates
 
 * dann: Txt_mit_images
 

@@ -31,11 +31,13 @@ cmp_bag(\@catkeys,[qw(root blog)],'cats');
 is(scalar @{$cats->{root}},0,'no nodes in root');
 is(scalar @{$cats->{blog}},5,'5 nodes in blog');
 
+#use Data::Dumper;
+#diag(Dumper $cats);
 # NODES 
 {
     my $node=$cats->{blog}[0];
     is($node->outpath,catfile($base,'out','blog','standalone_image.html'),'outpath');
-    is($node->url,'/blog/standalone_image.html','url');
+    is($node->absurl,'/blog/standalone_image.html','url');
 }
 
 # ALL NODES
