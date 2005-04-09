@@ -13,9 +13,7 @@ use Template;
 use DateTime;
 
 use Blio::Node;
-use Blio::Node::Dir;
 use Blio::Node::Txt;
-use Blio::Node::Image;
 
 $Blio::VERSION='0.01';
 

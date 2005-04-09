@@ -58,6 +58,14 @@ hmm...
 
 =head2 METHODS
 
+=head4 parse
+
+Parse a text file
+
+=head4 template
+
+return tempalte name, 'node'
+
 =head1 AUTHOR
 
 Thomas Klausner, domm@zsi.at
