@@ -12,7 +12,6 @@ use Carp;
 sub parse {
     my $self=shift;
     
-    print "parse ".$self->srcpath."\n"; 
     open(IN,$self->srcpath) || "cannot read ".$self->scrpath.": $!";
     my @lines=<IN>;
     my $title=shift(@lines);

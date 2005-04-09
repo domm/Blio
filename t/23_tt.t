@@ -9,8 +9,7 @@ plan tests=>3;
 use Test::NoWarnings;
 
 use Blio;
-my $blio=Blio->new({basedir=>$base});
-$blio->read_config;
+my $blio=Blio->new({basedir=>$base,cats=>{blog=>'Blog',root=>'Root'}});
 
 my $tt=$blio->tt;
 

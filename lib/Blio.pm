@@ -5,7 +5,6 @@ use warnings;
 
 use base qw(Class::Accessor Class::Singleton);
 
-use YAML qw(LoadFile);
 use File::Spec::Functions qw(abs2rel catfile catdir splitpath splitdir);
 use Carp;
 use File::Find;
@@ -15,10 +14,10 @@ use DateTime;
 use Blio::Node;
 use Blio::Node::Txt;
 
-$Blio::VERSION='0.01';
+$Blio::VERSION='0.02';
 
 # generate accessors
-Blio->mk_accessors(qw(basedir config cats _tt));
+Blio->mk_accessors(qw(basedir cats _tt));
 
 #----------------------------------------------------------------
 # new
@@ -35,36 +34,21 @@ sub _new_instance {
     my $class=shift;
     my $data=shift;
     croak("please pass a hashref to new") unless ref($data) eq 'HASH';
-
-    my $self=bless $data,$class;
-    $self->read_config;
-
-    my %cats;
-    foreach my $cat ($self->catdirs) {
-        $cats{$cat}=[]; 
+    croak("basedir missing") unless $data->{basedir};
+    croak("cats missing") unless $data->{cats};    
+    
+    my $rawcats=$data->{cats};
+    my $cats;
+    while (my ($cat,$title)=each %$rawcats) {
+        $cats->{$cat}={
+            id=>$cat,
+            title=>$title,
+            nodes=>[],
+        };
     }
-    $self->cats(\%cats);
-    return $self;
-}
-
-
-#----------------------------------------------------------------
-# read_conf
-#----------------------------------------------------------------
-sub read_config {
-    my $self=shift;
-    my $configfile=$self->configfile;
-    unless (-e $configfile) {
-        croak("Configfile $configfile missing!"); 
-    }
-    my $config;
-    eval {
-        $config=LoadFile($configfile);
-    };
-    croak("Parse error in config $configfile: $@") if $@;
-
-    $self->config($config);
-    return $self;
+    $data->{cats}=$cats;
+    
+    return bless $data,$class;
 }
 
 
@@ -76,9 +60,6 @@ sub collect {
     my $srcdir=$self->srcdir;
     my $outdir=$self->outdir;
     
-    my $ignore=$self->config->{ignore};
-    my $ignore_re=join('|',@$ignore);
-
     foreach my $cat ($self->catdirs) {
         opendir(DIR,catdir($srcdir,$cat)) || die "cannot open $srcdir/$cat: $!";
         while (my $f=readdir(DIR)) {
@@ -122,7 +103,7 @@ sub register_node {
         basename=>$basename,
     });
     $node->parse;
-    push(@{$self->cats->{$cat}},$node);
+    push(@{$self->cats->{$cat}{nodes}},$node);
     return;
 }
 
@@ -133,7 +114,7 @@ sub register_node {
 sub all_nodes {
     my $self=shift;
     my $cats=$self->cats;
-    my @all=map { @$_ } values %$cats;
+    my @all=map { @{$_->{nodes}} } values %{$cats};
     return wantarray ? @all : \@all;
 }
 
@@ -143,7 +124,11 @@ sub all_nodes {
 sub build {
     my $self=shift;
 
-    while (my ($cat,$nodes)=each %{$self->cats}) {
+    my $cats=$self->cats;
+
+    foreach my $id (keys %$cats) {
+        my $cat=$cats->{$id};
+        my $nodes=$cats->{$id}{nodes};
         foreach my $node (@$nodes) {
             $node->print;
         }
@@ -152,10 +137,12 @@ sub build {
         $tt->process(
             'category',
             {
+                id=>$id,
                 cat=>$cat,
                 nodes=>$nodes,
+                cats=>$cats, 
             },
-            catfile($cat,'/index.html')
+            catfile($id,'/index.html')
         ) || die $tt->error;
     }
 }
@@ -182,8 +169,7 @@ sub tt {
 sub outdir { catdir(shift->basedir,'out') }
 sub srcdir { catdir(shift->basedir,'src') }
 sub tpldir { catdir(shift->basedir,'templates') }
-sub configfile { catfile(shift->basedir,'blio.yaml') }
-sub catdirs { keys %{shift->config->{cats}} }
+sub catdirs { keys %{shift->cats} }
 8;
 
 
@@ -211,7 +197,7 @@ Blio converts src files which are stored in the srcdir into html documents.
 
 =head2 Configuration
 
-The configuration is stored in the file F<blio.yaml> in the root dir of your Blio installation.
+Pass config params to Blio in the build.pl script (wehn calling C<new>)
 
 =head3 basedir
 
@@ -263,11 +249,6 @@ For a standalone image an html page will be generated which displays the image a
 
 Creates a new Blio object.
 
-=head4 read_config
-
-Reads the config file (blio.yaml) and stores the configuration in
-$blio->config.
-
 =head4 collect
 
 Traverse srcdir and collect the files and directories contained in it.
@@ -303,10 +284,6 @@ Returns absolute path to dir containing templates.
 
 Returns the list of category (directory) names.
 
-=head4 configfile
-
-Returns absolute path to configfile (blio.yaml).
-
 =head4 all_nodes
 
 Returns an arrayref of all nodes
@@ -316,10 +293,6 @@ Returns an arrayref of all nodes
 =head4 basedir
 
 Absolute path to basedir.
-
-=head4 config
-
-The config data structur (blio.yaml).
 
 =head4 tt
 

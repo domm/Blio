@@ -38,7 +38,8 @@ sub print {
         $self->template,
         {
             node=>$self,
-            blio=>$blio,
+            cat=>$blio->cats->{$self->cat},
+            cats=>$blio->cats,
         },
         $self->absurl
     ) || die $tt->error;
@@ -50,8 +51,6 @@ sub print {
 sub parse {
     my $self=shift;
 
-    print "base parse ".$self->srcpath."\n";
-    
     # open srcfile
     # read it
     # text2html

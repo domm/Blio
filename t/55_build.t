@@ -9,8 +9,7 @@ use Test::NoWarnings;
 use Test::Deep;
 
 use Blio;
-my $blio=Blio->new({basedir=>$base});
-$blio->read_config;
+my $blio=Blio->new({basedir=>$base,cats=>{blog=>'Blog',root=>'Root'}});
 
 $blio->collect;
 $blio->build;
