@@ -22,7 +22,6 @@ $Blio::VERSION='0.01';
 # generate accessors
 Blio->mk_accessors(qw(basedir config cats _tt));
 
-
 #----------------------------------------------------------------
 # new
 #----------------------------------------------------------------
@@ -38,9 +37,16 @@ sub _new_instance {
     my $class=shift;
     my $data=shift;
     croak("please pass a hashref to new") unless ref($data) eq 'HASH';
-    $data->{cats}={root=>[],};
-    
-    return bless $data,$class;
+
+    my $self=bless $data,$class;
+    $self->read_config;
+
+    my %cats;
+    foreach my $cat ($self->catdirs) {
+        $cats{$cat}=[]; 
+    }
+    $self->cats(\%cats);
+    return $self;
 }
 
 
@@ -74,22 +80,26 @@ sub collect {
     
     my $ignore=$self->config->{ignore};
     my $ignore_re=join('|',@$ignore);
-    
-    my $wanted=sub {
-        return if $File::Find::name=~/$ignore_re/;
-        return if /^\.+$/;
-        if (-f) {
-            $self->register_node($File::Find::name);
-        } elsif (-d) {
-            my $d=abs2rel($File::Find::name,$srcdir);
-            my $od=catdir($outdir,$d);
-            unless (-e $od) {
-                mkdir($od) || croak ("Cannot create $od: $!");
+
+    foreach my $cat ($self->catdirs) {
+        opendir(DIR,catdir($srcdir,$cat)) || die "cannot open $srcdir/$cat: $!";
+        while (my $f=readdir(DIR)) {
+            chomp($f);
+            next unless $f=~/\.txt$/;
+            next if $f=~/^\.+$/;
+            
+            my $absf=catfile($srcdir,$cat,$f);
+            if (-f $absf) {
+                $self->register_node($absf,$cat);
+            } elsif (-d $absf) {
+                my $od=catdir($outdir,$f);
+                unless (-e $od) {
+                    mkdir($od) || croak ("Cannot create $od: $!");
+                }
             }
         }
-    };
-    find($wanted,$srcdir);
-
+        close DIR;
+    }
 }
 
 
@@ -99,64 +109,25 @@ sub collect {
 sub register_node {
     my $self=shift;
     my $srcpath=shift;
-    my $srcdir=$self->srcdir;
-
-    my $abs=$srcpath;
-    my $rel=abs2rel($srcpath,$srcdir);
-    my ($v,$d,$f)=splitpath($rel);
-    my @dir=splitdir($d);
-    if ($dir[-1] eq '') {  # File::Spec::splitdir might return an empty
-        pop(@dir);         # dir name; remove it
-    }
-
-    # currently, Blio doesn't support nested categories
-    return if @dir>2; 
-
-    # if it's in a subdir, ignore it, as subnodes are handled by the parent
-    # node
-    return if @dir>1;
-    
-    my $cat=$dir[0] || 'root';
-    $self->register_category($cat);
-    
-    my $srcfile=$f;
+    my $cat=shift;
+    my $nodeclass='Blio::Node::Txt';
    
+    my ($vol,$dir,$f)=splitpath($srcpath);
+    
     $f=~/^(.*)\.(.*?)$/;
     my $basename=$1;
     my $ext=$2;
-    my $nodeclass;
-    
-    if ($ext eq 'txt') {
-        $nodeclass='Txt';
-    } elsif ($ext=~/^(jpg|jpeg|gif|png)$/) {
-        $nodeclass='Image';
-    }
-    
-    return unless $nodeclass;
-    $nodeclass='Blio::Node::'.$nodeclass;
     
     my $node=$nodeclass->new({
         srcpath=>$srcpath,
         cat=>$cat,
         basename=>$basename,
-        srcfile=>$srcfile,
     });
     $node->parse;
     push(@{$self->cats->{$cat}},$node);
     return;
 }
 
-
-#----------------------------------------------------------------
-# register_category
-#----------------------------------------------------------------
-sub register_category {
-    my $self=shift;
-    my $cat=shift;
-    my $cats=$self->cats;
-    return if $cats->{$cat};
-    $cats->{$cat}=[];
-}
 
 #----------------------------------------------------------------
 # all_nodes
@@ -174,9 +145,7 @@ sub all_nodes {
 sub build {
     my $self=shift;
 
-
     while (my ($cat,$nodes)=each %{$self->cats}) {
-        print "cat $cat\n";
         foreach my $node (@$nodes) {
             $node->print;
         }
@@ -212,11 +181,11 @@ sub tt {
 #----------------------------------------------------------------
 # Accessor Methods
 #----------------------------------------------------------------
-sub outdir { return catdir(shift->basedir,'out') }
-sub srcdir { return catdir(shift->basedir,'src') }
-sub tpldir { return catdir(shift->basedir,'templates') }
-sub configfile { return catfile(shift->basedir,'blio.yaml') }
-
+sub outdir { catdir(shift->basedir,'out') }
+sub srcdir { catdir(shift->basedir,'src') }
+sub tpldir { catdir(shift->basedir,'templates') }
+sub configfile { catfile(shift->basedir,'blio.yaml') }
+sub catdirs { keys %{shift->config->{cats}} }
 8;
 
 
@@ -331,6 +300,10 @@ Returns absolute path to srcdir.
 =head4 tpldir
 
 Returns absolute path to dir containing templates.
+
+=head4 catdirs
+
+Returns the list of category (directory) names.
 
 =head4 configfile
 

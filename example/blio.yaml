@@ -2,3 +2,8 @@
 basedir: /home/domm/perl/Blio/example
 ignore:
   - \.svn
+
+cats:
+  root: Root Cat
+  blog: The Blog
+
