@@ -42,7 +42,6 @@ sub print {
         },
         $self->absurl
     ) || die $tt->error;
-    
 }   
 
 #----------------------------------------------------------------
@@ -93,20 +92,12 @@ sub relurl {
 }
 
 #----------------------------------------------------------------
-# filename
-#----------------------------------------------------------------
-sub filename {
-    my $self=shift;
-    my $src=$self;
-}
-
-#----------------------------------------------------------------
 # mtime
 #----------------------------------------------------------------
 sub mtime {
     my $self=shift;
     my $date=$self->date;
-    return DateTime->now unless $date;
+    return DateTime->now->epoch unless $date;
     return $date->epoch;
 }
 
@@ -129,13 +120,35 @@ hmm...
 
 =head2 METHODS
 
+=head4 new
+
+Generates and returns a new Node.
+
+=head4 print
+
+Pass the Nodes data to the Nodes template. Print output file.
+
+=head4 parse
+
+Stub Method. Has to be overridden in subclass (eg C<Blio::Node::Txt>).
+
+C<parse> should read the source file and generate the Nodes data.
+
 =head4 outpath
 
 Returns the absolute path to the html file.
 
-=head4 url
+=head4 absurl
 
 Returns the url (absolute from docroot)
+
+=head4 relurl
+
+Retunrs the url (relative to the current dir, i.e. 'filename.html')
+
+=head4 mtime
+
+Returns the mtime of a node as seconds since the epoch.
 
 =head1 AUTHOR
 
