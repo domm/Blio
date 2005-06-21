@@ -72,6 +72,10 @@ sub find_stuff {
     
     if (-d $lookfor) {
         print "SUBDIR $lookfor\n";
+        my $subdir;
+        opendir($subdir,$lookfor);
+        while(readdir,
+        
     } else {
         my $img;my $file;
         if (-e $lookfor.".jpg") {

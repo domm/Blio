@@ -26,8 +26,8 @@ sub mangle {
             
         $self->width($img->getwidth);
         $self->height($img->getheight);
-        $self->thumb_width($img->getwidth);
-        $self->thumb_height($img->getheight);
+        $self->thumb_width($th->getwidth);
+        $self->thumb_height($th->getheight);
     } else {
         # copy image
         copy($self->srcfile,$self->outfile) || croak "Cannot copy image ".$self->image;

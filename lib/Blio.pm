@@ -62,8 +62,9 @@ sub collect {
     my $outdir=$self->outdir;
     
     foreach my $cat ($self->catdirs) {
-        opendir(DIR,catdir($srcdir,$cat)) || die "cannot open $srcdir/$cat: $!";
-        while (my $f=readdir(DIR)) {
+        my $dir;
+        opendir($dir,catdir($srcdir,$cat)) || die "cannot open $srcdir/$cat: $!";
+        while (my $f=readdir($dir)) {
             chomp($f);
             next unless $f=~/\.txt$/;
             next if $f=~/^\.+$/;
@@ -78,7 +79,7 @@ sub collect {
                 }
             }
         }
-        close DIR;
+        close $dir;
     }
 }
 
