@@ -9,7 +9,7 @@ use Carp;
 use File::Spec::Functions qw(catdir catfile abs2rel);
 
 # generate accessors
-Blio::Node->mk_accessors(qw(srcpath srcfile basename title text date cat template));
+Blio::Node->mk_accessors(qw(srcpath srcfile basename title text date cat template pos images));
 
 
 #----------------------------------------------------------------
@@ -18,7 +18,6 @@ Blio::Node->mk_accessors(qw(srcpath srcfile basename title text date cat templat
 sub new {
     my $class=shift;
     my $data=shift;
-
     my $self=bless $data,$class;
     my $mtime=(stat($self->srcpath))[9];
     $self->date(DateTime->from_epoch(epoch=>$mtime));
@@ -61,6 +60,48 @@ sub parse {
     # vor allem Dir und Sub nodes muessen ja einiges extra machen
 }
 
+
+#----------------------------------------------------------------
+# find_stuff
+#----------------------------------------------------------------
+sub find_stuff {
+    my $self=shift;
+
+    my $blio=Blio->instance;
+    my $lookfor=catfile($blio->srcdir,$self->cat,$self->basename);
+    
+    if (-d $lookfor) {
+        print "SUBDIR $lookfor\n";
+    } else {
+        my $img;my $file;
+        if (-e $lookfor.".jpg") {
+            $file=$lookfor.".jpg";
+            $img=$self->basename.".jpg";
+        } elsif (-e $lookfor.".png") {
+            $file=$lookfor.".png";
+            $img=$self->basename.".png";
+        }
+        if ($img) {
+            my $mtime=(stat($file))[9];
+            $self->register_images({$img=>$mtime});
+        }
+    }
+}
+
+sub register_images {
+    my $self=shift;
+    my $imgs=shift;
+    my $cat=$self->cat;
+    
+    my @images;
+    foreach my $img (sort {$imgs->{$a} <=> $imgs->{$b}} keys %$imgs) {
+        my $i=Blio::Node::Image->new({node=>$self,image=>$img,mtime=>$imgs->{$img}});
+        $i->mangle;
+        push(@images,$i);
+    }
+    $self->images(\@images);
+}
+
 #----------------------------------------------------------------
 # outpath
 #----------------------------------------------------------------
@@ -69,7 +110,6 @@ sub outpath {
     if ($self->{outpath}) {
         return $self->outpath;
     }
-    my $srcpath=$self->srcpath;
     my $outdir=Blio->instance->outdir;
     return catfile($outdir,$self->cat,$self->basename.".html");
 }
@@ -100,10 +140,24 @@ sub mtime {
     return $date->epoch;
 }
 
+
 8;
 
 
 __END__
+
+
+srcfile    /home/domm/bla/blio/src/foo/bar.txt
+outfile    /home/domm/bla/blio/out/foo/bar.html
+absurl     /foo/bar.html
+relurl     bar.html
+
+srcfile    /home/domm/bla/blio/src/foo/bar.jpg
+outfile    /home/domm/bla/blio/out/foo/bar.jpg
+img        bar.jpg
+outfile_th /home/domm/bla/blio/out/foo/th_bar.jpg
+thumb      th_bar.jpg
+
 
 =pod
 

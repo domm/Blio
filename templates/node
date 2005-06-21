@@ -5,6 +5,6 @@
 [% node.text %]
 
 [% FOREACH img IN node.images %]
-    <a href="img.image"><img src="img.thumbnail" border="0"></a>
+    <a href="img.image"><img src="img.thumb" border="0"></a>
 [% END %]
 

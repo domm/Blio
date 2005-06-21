@@ -13,6 +13,7 @@ use DateTime;
 
 use Blio::Node;
 use Blio::Node::Txt;
+use Blio::Node::Image;
 
 $Blio::VERSION='0.02';
 
@@ -102,6 +103,8 @@ sub register_node {
         cat=>$cat,
         basename=>$basename,
     });
+    
+    $node->find_stuff;
     $node->parse;
     push(@{$self->cats->{$cat}{nodes}},$node);
     return;
@@ -129,8 +132,11 @@ sub build {
     foreach my $id (keys %$cats) {
         my $cat=$cats->{$id};
         my $nodes=$cats->{$id}{nodes};
+        my $pos=0;
         foreach my $node (@$nodes) {
+            $node->pos($pos);
             $node->print;
+            $pos++;
         }
 
         my $tt=$self->tt;
