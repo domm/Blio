@@ -6,10 +6,12 @@ use warnings;
 use base qw(Class::Accessor);
 
 use Carp;
-use File::Spec::Functions qw(catdir catfile abs2rel);
+use File::Spec::Functions qw(catdir catfile abs2rel splitpath splitdir);
 
 # generate accessors
-Blio::Node->mk_accessors(qw(srcpath srcfile basename title text date cat template pos images));
+Blio::Node->mk_accessors(qw(srcpath basename ext dir dirs is_top parent_id 
+    nodes
+    srcfile title text date cat template pos images));
 
 
 #----------------------------------------------------------------
@@ -24,6 +26,59 @@ sub new {
 
     return $self;
 }
+
+sub register {
+    my $class=shift;
+    my $srcpath=shift;
+    my $blio=Blio->instance;
+
+    my $local=abs2rel($srcpath,$blio->srcdir);
+    my ($vol,$dir,$file)=splitpath($local);
+    $dir=~s|/$||;
+    my @dirs=splitdir($dir);
+    $file=~/^(.*)\.(.*)/;
+    my $basename=$1;
+    my $ext=$2;
+    
+    my $nodeclass=$class."::Txt";
+    $nodeclass=$class."::Image" unless $ext eq 'txt';
+    my $node=bless {
+        srcpath=>$srcpath,
+        basename=>$basename,
+        ext=>$ext,
+        dir=>$dir,
+        dirs=>\@dirs,
+        nodes=>[],
+    },$nodeclass;
+
+    if ($dir) {
+        $node->parent_id($dir);
+        my $parent=$blio->allnodes->{$node->parent_id};
+        push(@{$parent->nodes},$node);    
+    } else {
+        $node->is_top(1);
+        push(@{$blio->topnodes},$node);
+    }
+    
+    $blio->allnodes->{$node->id}=$node;
+}
+
+
+sub id {
+    my $self=shift;
+    return $self->basename if $self->is_top;
+    return $self->dir.'/'.$self->basename;
+}
+
+#----------------------------------------------------------------
+# parse
+#----------------------------------------------------------------
+sub parse {
+    
+    croak "'parse' has to be implemented in Subclass!"
+}
+
+
 
 #----------------------------------------------------------------
 # print
@@ -44,21 +99,6 @@ sub print {
     ) || die $tt->error;
 }   
 
-#----------------------------------------------------------------
-# parse
-#----------------------------------------------------------------
-sub parse {
-    my $self=shift;
-
-    # open srcfile
-    # read it
-    # text2html
-    # store data
-    # handle_image (nur bei Txt)
-    
-    # oder besser in jeder Node extra?
-    # vor allem Dir und Sub nodes muessen ja einiges extra machen
-}
 
 
 #----------------------------------------------------------------
@@ -74,7 +114,7 @@ sub find_stuff {
         print "SUBDIR $lookfor\n";
         my $subdir;
         opendir($subdir,$lookfor);
-        while(readdir,
+        #while(readdir,
         
     } else {
         my $img;my $file;

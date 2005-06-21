@@ -7,9 +7,9 @@ use base qw(Class::Accessor Class::Singleton);
 
 use File::Spec::Functions qw(abs2rel catfile catdir splitpath splitdir);
 use Carp;
-use File::Find;
 use Template;
 use DateTime;
+use File::Find;
 
 use Blio::Node;
 use Blio::Node::Txt;
@@ -18,7 +18,7 @@ use Blio::Node::Image;
 $Blio::VERSION='0.02';
 
 # generate accessors
-Blio->mk_accessors(qw(basedir cats _tt));
+Blio->mk_accessors(qw(basedir cats _tt topnodes allnodes));
 
 #----------------------------------------------------------------
 # new
@@ -36,19 +36,9 @@ sub _new_instance {
     my $data=shift;
     croak("please pass a hashref to new") unless ref($data) eq 'HASH';
     croak("basedir missing") unless $data->{basedir};
-    croak("cats missing") unless $data->{cats};    
     
-    my $rawcats=$data->{cats};
-    my $cats;
-    while (my ($cat,$title)=each %$rawcats) {
-        $cats->{$cat}={
-            id=>$cat,
-            title=>$title,
-            nodes=>[],
-        };
-    }
-    $data->{cats}=$cats;
-    
+    $data->{topnodes}=[]; 
+    $data->{allnodes}={}; 
     return bless $data,$class;
 }
 
@@ -60,55 +50,30 @@ sub collect {
     my $self=shift;
     my $srcdir=$self->srcdir;
     my $outdir=$self->outdir;
-    
-    foreach my $cat ($self->catdirs) {
-        my $dir;
-        opendir($dir,catdir($srcdir,$cat)) || die "cannot open $srcdir/$cat: $!";
-        while (my $f=readdir($dir)) {
-            chomp($f);
-            next unless $f=~/\.txt$/;
-            next if $f=~/^\.+$/;
-            
-            my $absf=catfile($srcdir,$cat,$f);
-            if (-f $absf) {
-                $self->register_node($absf,$cat);
-            } elsif (-d $absf) {
-                my $od=catdir($outdir,$f);
-                unless (-e $od) {
-                    mkdir($od) || croak ("Cannot create $od: $!");
-                }
-            }
-        }
-        close $dir;
-    }
+
+    find(\&ff_wanted,$srcdir);
+
+}
+
+#----------------------------------------------------------------
+# ff_wanted
+#----------------------------------------------------------------
+sub ff_wanted {
+    return if $File::Find::name=~/\.svn/;
+    return unless $_=~/\.(txt|jpg|png)$/;
+    Blio::Node->register($File::Find::name);
 }
 
 
+
 #----------------------------------------------------------------
-# register_node
+# read
 #----------------------------------------------------------------
-sub register_node {
+sub read {
     my $self=shift;
-    my $srcpath=shift;
-    my $cat=shift;
-    my $nodeclass='Blio::Node::Txt';
-   
-    my ($vol,$dir,$f)=splitpath($srcpath);
-    
-    $f=~/^(.*)\.(.*?)$/;
-    my $basename=$1;
-    my $ext=$2;
-    
-    my $node=$nodeclass->new({
-        srcpath=>$srcpath,
-        cat=>$cat,
-        basename=>$basename,
-    });
-    
-    $node->find_stuff;
-    $node->parse;
-    push(@{$self->cats->{$cat}{nodes}},$node);
-    return;
+    foreach my $n (values %{$self->allnodes}) {
+        $n->parse;
+    }
 }
 
 

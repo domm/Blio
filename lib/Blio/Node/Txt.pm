@@ -11,9 +11,11 @@ use Carp;
 #----------------------------------------------------------------
 sub parse {
     my $self=shift;
-    
-    open(IN,$self->srcpath) || "cannot read ".$self->scrpath.": $!";
-    my @lines=<IN>;
+   
+    my $in;
+    print $self->srcpath,"\n";
+    open($in,$self->srcpath) || "cannot read ".$self->scrpath.": $!";
+    my @lines=<$in>;
     my $title=shift(@lines);
     chomp($title);
     

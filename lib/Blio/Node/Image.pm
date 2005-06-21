@@ -3,13 +3,18 @@ package Blio::Node::Image;
 use strict;
 use warnings;
 
-use base qw(Class::Accessor);
+use base qw(Blio::Node);
 use Carp;
 use File::Copy;
 use Imager;
 use File::Spec::Functions qw(catdir catfile abs2rel);
 
 Blio::Node::Image->mk_accessors(qw(node loc image mtime outfile thumb width height alt thumb_width thumb_height));
+
+
+sub id { return 'dfs' }
+sub parse {}
+
 
 sub mangle {
     my $self=shift;
