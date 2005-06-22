@@ -90,6 +90,14 @@ sub all_nodes {
 #----------------------------------------------------------------
 # build
 #----------------------------------------------------------------
+sub write {
+    my $self=shift;
+    foreach my $tn (@{$self->topnodes}) {
+        $tn->write;
+    }
+}
+
+
 sub build {
     my $self=shift;
 

@@ -9,9 +9,10 @@ use Carp;
 use File::Spec::Functions qw(catdir catfile abs2rel splitpath splitdir);
 
 # generate accessors
-Blio::Node->mk_accessors(qw(srcpath basename ext dir dirs is_top parent_id 
-    nodes
-    srcfile title text date cat template pos images));
+Blio::Node->mk_accessors(qw(srcpath basename ext dir dirs is_top 
+    parent parent_id 
+    nodes images title text date mtime
+    srcfile cat template pos images));
 
 
 #----------------------------------------------------------------
@@ -40,65 +41,94 @@ sub register {
     my $basename=$1;
     my $ext=$2;
     
+    my $mtime=(stat($srcpath))[9];
+    
     my $nodeclass=$class."::Txt";
     $nodeclass=$class."::Image" unless $ext eq 'txt';
     my $node=bless {
         srcpath=>$srcpath,
         basename=>$basename,
-        ext=>$ext,
+        ext=>$ext eq 'txt' ? 'html' : $ext,
         dir=>$dir,
         dirs=>\@dirs,
         nodes=>[],
+        images=>[],
+        mtime=>$mtime,
+        date=>DateTime->from_epoch(epoch=>$mtime),
     },$nodeclass;
 
+    
     if ($dir) {
-        $node->parent_id($dir);
-        my $parent=$blio->allnodes->{$node->parent_id};
-        push(@{$parent->nodes},$node);    
+        if (my $same=$blio->allnodes->{$node->id}) {
+            my ($parent,$image);
+            if ($node->is_image) {
+                $parent=$same;
+                $image=$node;
+            } else {
+                $parent=$node;
+                $image=$same;
+                $blio->allnodes->{$node->id}=$parent;
+            }
+            $image->parent($parent);
+            push(@{$parent->images},$image);
+        } else {
+            # add to parent
+            $node->parent_id($dir);
+            my $parent=$blio->allnodes->{$node->parent_id};
+            $node->parent($parent);
+            if ($node->is_image) {
+                push(@{$parent->images},$node);
+            } else {
+                push(@{$parent->nodes},$node);
+                $blio->allnodes->{$node->id}=$node;
+            }
+        }
     } else {
         $node->is_top(1);
         push(@{$blio->topnodes},$node);
+        $blio->allnodes->{$node->id}=$node;
     }
     
-    $blio->allnodes->{$node->id}=$node;
-}
-
-
-sub id {
-    my $self=shift;
-    return $self->basename if $self->is_top;
-    return $self->dir.'/'.$self->basename;
 }
 
 #----------------------------------------------------------------
 # parse
 #----------------------------------------------------------------
-sub parse {
-    
-    croak "'parse' has to be implemented in Subclass!"
-}
+sub parse { croak "'parse' has to be implemented in Subclass!" }
 
 
-
-#----------------------------------------------------------------
-# print
-#----------------------------------------------------------------
-sub print {
+sub write {
     my $self=shift;
     my $blio=Blio->instance;
-    print $self->absurl."\n";
+
+    # check if dir exists
+   
+    # handle images
+    foreach my $i (@{$self->images}) {
+        $i->write;
+    }   
+    
+    
     my $tt=$blio->tt;
     $tt->process(
         $self->template,
         {
             node=>$self,
-            cat=>$blio->cats->{$self->cat},
-            cats=>$blio->cats,
         },
-        $self->absurl
+        $self->url
     ) || die $tt->error;
-}   
 
+    my $pos=0;
+    my @sorted;
+    foreach my $sn (sort {$b->mtime <=> $a->mtime} @{$self->nodes}) {
+        print $sn->mtime," ",$sn->id,"\n";
+        $sn->pos($pos);
+        push(@sorted,$sn);
+        $pos++;
+    }
+    $self->nodes(\@sorted);
+    foreach (@sorted) { $_->write }
+}
 
 
 #----------------------------------------------------------------
@@ -158,32 +188,28 @@ sub outpath {
     return catfile($outdir,$self->cat,$self->basename.".html");
 }
 
-#----------------------------------------------------------------
-# absurl
-#----------------------------------------------------------------
-sub absurl {
+sub outfile {
     my $self=shift;
-    return join('/','',$self->cat,$self->basename.".html");
+    my $outdir=Blio->instance->outdir;
+    return catfile($outdir,$self->dir,$self->basename.".html");
 }
 
-#----------------------------------------------------------------
-# relurl
-#----------------------------------------------------------------
-sub relurl {
+sub id {
     my $self=shift;
-    return $self->basename.".html";
+    return $self->basename if $self->is_top;
+    return $self->dir.'/'.$self->basename;
 }
 
-#----------------------------------------------------------------
-# mtime
-#----------------------------------------------------------------
-sub mtime {
-    my $self=shift;
-    my $date=$self->date;
-    return DateTime->now->epoch unless $date;
-    return $date->epoch;
-}
+sub is_image { 0 }
 
+#----------------------------------------------------------------
+# url
+#----------------------------------------------------------------
+sub url {
+    my $self=shift;
+    return '/'.$self->filename if $self->is_top;
+    return join('/','',$self->dir,$self->filename);
+}
 
 8;
 
@@ -194,11 +220,11 @@ __END__
 srcfile    /home/domm/bla/blio/src/foo/bar.txt
 outfile    /home/domm/bla/blio/out/foo/bar.html
 absurl     /foo/bar.html
-relurl     bar.html
+filename   bar.html
 
 srcfile    /home/domm/bla/blio/src/foo/bar.jpg
 outfile    /home/domm/bla/blio/out/foo/bar.jpg
-img        bar.jpg
+filename   bar.jpg
 outfile_th /home/domm/bla/blio/out/foo/th_bar.jpg
 thumb      th_bar.jpg
 

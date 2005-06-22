@@ -27,6 +27,7 @@ sub parse {
             day=>substr($rdate,6,2),
         );
         $self->date($date);
+        $self->mtime($date->epoch);
         $title=~s/ --.*$//;
     }
    
@@ -39,6 +40,8 @@ sub parse {
 }
 
 sub template { 'node' }
+
+sub filename { return shift->basename.".html" }
 
 8;
 
