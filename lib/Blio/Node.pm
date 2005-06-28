@@ -101,18 +101,25 @@ sub write {
     my $self=shift;
     my $blio=Blio->instance;
 
+    print $self->url,"\n";
     # check if dir exists
-   
+    unless($self->is_top) {
+        my $pdir=catdir($blio->outdir,$self->parent->id);
+        unless (-d $pdir) {
+            mkdir($pdir);
+        }
+    }
+    
     # handle images
     foreach my $i (@{$self->images}) {
         $i->write;
     }   
     
-    
     my $tt=$blio->tt;
     $tt->process(
         $self->template,
         {
+            blio=>$blio,
             node=>$self,
         },
         $self->url
@@ -121,7 +128,7 @@ sub write {
     my $pos=0;
     my @sorted;
     foreach my $sn (sort {$b->mtime <=> $a->mtime} @{$self->nodes}) {
-        print $sn->mtime," ",$sn->id,"\n";
+        #print $sn->mtime," ",$sn->id,"\n";
         $sn->pos($pos);
         push(@sorted,$sn);
         $pos++;
@@ -130,51 +137,6 @@ sub write {
     foreach (@sorted) { $_->write }
 }
 
-
-#----------------------------------------------------------------
-# find_stuff
-#----------------------------------------------------------------
-sub find_stuff {
-    my $self=shift;
-
-    my $blio=Blio->instance;
-    my $lookfor=catfile($blio->srcdir,$self->cat,$self->basename);
-    
-    if (-d $lookfor) {
-        print "SUBDIR $lookfor\n";
-        my $subdir;
-        opendir($subdir,$lookfor);
-        #while(readdir,
-        
-    } else {
-        my $img;my $file;
-        if (-e $lookfor.".jpg") {
-            $file=$lookfor.".jpg";
-            $img=$self->basename.".jpg";
-        } elsif (-e $lookfor.".png") {
-            $file=$lookfor.".png";
-            $img=$self->basename.".png";
-        }
-        if ($img) {
-            my $mtime=(stat($file))[9];
-            $self->register_images({$img=>$mtime});
-        }
-    }
-}
-
-sub register_images {
-    my $self=shift;
-    my $imgs=shift;
-    my $cat=$self->cat;
-    
-    my @images;
-    foreach my $img (sort {$imgs->{$a} <=> $imgs->{$b}} keys %$imgs) {
-        my $i=Blio::Node::Image->new({node=>$self,image=>$img,mtime=>$imgs->{$img}});
-        $i->mangle;
-        push(@images,$i);
-    }
-    $self->images(\@images);
-}
 
 #----------------------------------------------------------------
 # outpath

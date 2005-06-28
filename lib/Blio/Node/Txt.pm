@@ -13,7 +13,7 @@ sub parse {
     my $self=shift;
    
     my $in;
-    print $self->srcpath,"\n";
+    #print $self->srcpath,"\n";
     open($in,$self->srcpath) || "cannot read ".$self->scrpath.": $!";
     my @lines=<$in>;
     my $title=shift(@lines);

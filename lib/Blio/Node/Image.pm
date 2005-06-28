@@ -24,9 +24,10 @@ sub write {
     
     if (-e $self->outfile) {
         # image exists check mtime
-        print "skip image (should check mtime...)\n";
-        print $self->url,"\n";
-        # should also get height and width
+        #print "skip image (should check mtime...)\n";
+        #print $self->url,"\n";
+        
+        # get height and width
         my $img=Imager->new;
         $img->open(file=>$self->outfile) || die $img->errstr();
         my $th=Imager->new;
@@ -36,8 +37,9 @@ sub write {
         $self->height($img->getheight);
         $self->thumb_width($th->getwidth);
         $self->thumb_height($th->getheight);
+    
     } else {
-        print "make thumbnail\n";
+        #print "make thumbnail\n";
 
         # copy image
         copy($self->srcpath,$self->outfile) || croak "Cannot copy image ".$self->filename," to ",$self->outfile;
@@ -48,51 +50,15 @@ sub write {
         my $resize=$img->scale(xpixels=>300);
         $resize->write(file=>$self->outfile_th) || die $resize->errstr;
     
+        # get height and width
         $self->width($img->getwidth);
         $self->height($img->getheight);
         $self->thumb_width($resize->getwidth);
         $self->thumb_height($resize->getheight);
     }
-    
 }
+
 sub is_image { 1 }
-
-sub mangle {
-    my $self=shift;
-
-    if (-e $self->outfile) {
-        # image exists check mtime
-        print "skip image (should check mtime...)\n";
-
-        # should also get height and width
-        my $img=Imager->new;
-        $img->open(file=>$self->outfile) || die $img->errstr();
-        my $th=Imager->new;
-        $th->open(file=>$self->outfile_th) || die $img->errstr();
-            
-        $self->width($img->getwidth);
-        $self->height($img->getheight);
-        $self->thumb_width($th->getwidth);
-        $self->thumb_height($th->getheight);
-    } else {
-        # copy image
-        print "paretn" ,$self->parent->id,"\n";
-        #copy($self->srcfile,$self->outfile) || croak "Cannot copy image ".$self->image;
-        
-        # make thumbnail
-        my $img=Imager->new;
-        $img->open(file=>$self->srcfile) || die $img->errstr();
-        my $resize=$img->scale(xpixels=>300);
-        $resize->write(file=>$self->outfile_th) || die $resize->errstr;
-    
-        $self->width($img->getwidth);
-        $self->height($img->getheight);
-        $self->thumb_width($img->getwidth);
-        $self->thumb_height($img->getheight);
-    }
-}
-
-
 
 
 sub srcfile {
