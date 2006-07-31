@@ -1,3 +1,11 @@
 Another simple page -- 20050226
 
 This is another simple page
+
+with some markup
+
+* a list
+* with items
+
+some text with [http://foobar some] [http://perl.org links]
+

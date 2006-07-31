@@ -38,8 +38,9 @@ sub parse {
     # transform text
     my $html=$text;
     
-    $html=~s/\n\n* /<ul><li>/gs;
-    $html=~s/\n* (.*?)\n\n/<li>$1<\/ul>/gs;
+    $html=~s/\n\n\* /<ul><li>/gs;
+    $html=~s/\n\*/<li>/gs;
+    $html=~s/<li> (.*?)\n\n/<li>$1<\/ul>/gs;
     
     $html=~s/\n/<br>/gs;
     $html=~s|\[(.*?)\s+(.*?)\]|<a href="$1">$2</a>|gs;
