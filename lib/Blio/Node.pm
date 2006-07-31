@@ -11,7 +11,7 @@ use File::Spec::Functions qw(catdir catfile abs2rel splitpath splitdir);
 # generate accessors
 Blio::Node->mk_accessors(qw(srcpath basename ext dir dirs is_top 
     parent parent_id 
-    nodes images title text date mtime
+    nodes images title text teaser date mtime
     srcfile cat template pos images));
 
 
@@ -57,7 +57,6 @@ sub register {
         date=>DateTime->from_epoch(epoch=>$mtime),
     },$nodeclass;
 
-    
     if ($dir) {
         if (my $same=$blio->allnodes->{$node->id}) {
             my ($parent,$image);

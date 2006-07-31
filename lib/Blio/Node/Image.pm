@@ -21,11 +21,16 @@ sub write {
     unless (-d $pdir) {
         mkdir($pdir);
     }
+   
+    # hmm: zur beschleunigung:
+    # bei neuen images wird die x/y und th-x/y in ein globales file
+    # geschrieben (hash indiziert ueber url)
+    # beim naechsten durchlauf werden fuer existierende bilder die werte aus
+    # diesem file genommen
     
     if (-e $self->outfile) {
         # image exists check mtime
-        #print "skip image (should check mtime...)\n";
-        #print $self->url,"\n";
+        #print "get existing image info\n";
         
         # get height and width
         my $img=Imager->new;

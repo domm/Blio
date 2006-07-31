@@ -35,8 +35,19 @@ sub parse {
     unshift(@lines,$empty) if $empty=~/\w/;
     my $text=join('',@lines);
 
+    # transform text
+    my $html=$text;
+    $html=~s/\n/<br>/gs;
+    $html=~s|\[(.*?)\s+(.*?)\]|<a href="$1">$2</a>|gs;
+    
+    my $teaser=$text;
+    $teaser=~s|\[(.*?)\s+(.*?)\]|$2|gs;
+    if (length($teaser)>=150) {
+        $teaser=substr($teaser,0,150)."...";
+    }
     $self->title($title);
-    $self->text($text);
+    $self->teaser($teaser);
+    $self->text($html);
 }
 
 sub template { 'node' }
