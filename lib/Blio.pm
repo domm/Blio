@@ -88,42 +88,12 @@ sub all_nodes {
 }
 
 #----------------------------------------------------------------
-# build
+# write
 #----------------------------------------------------------------
 sub write {
     my $self=shift;
     foreach my $tn (@{$self->topnodes}) {
         $tn->write;
-    }
-}
-
-
-sub build {
-    my $self=shift;
-
-    my $cats=$self->cats;
-
-    foreach my $id (keys %$cats) {
-        my $cat=$cats->{$id};
-        my $nodes=$cats->{$id}{nodes};
-        my $pos=0;
-        foreach my $node (@$nodes) {
-            $node->pos($pos);
-            $node->print;
-            $pos++;
-        }
-
-        my $tt=$self->tt;
-        $tt->process(
-            'category',
-            {
-                id=>$id,
-                cat=>$cat,
-                nodes=>$nodes,
-                cats=>$cats, 
-            },
-            catfile($id,'/index.html')
-        ) || die $tt->error;
     }
 }
 
@@ -241,10 +211,6 @@ Registers a new category. If the category already exists, does nothing;
 
 Figures out what kind of node the $srcpath points to. Generates a fitting
 Blio::Node::* object and registers the node in the node registry.
-
-=head4 build
-
-Fetch all nodes and generate an HTML page in outdir for each node.
 
 =head3 Accessor Methods
 

@@ -58,6 +58,8 @@ sub register {
     },$nodeclass;
 
     if ($dir) {
+        # print STDERR "# is dir $dir - $srcpath $basename - $local \n";
+        
         if (my $same=$blio->allnodes->{$node->id}) {
             my ($parent,$image);
             if ($node->is_image) {
@@ -74,6 +76,7 @@ sub register {
             # add to parent
             $node->parent_id($dir);
             my $parent=$blio->allnodes->{$node->parent_id};
+            die "no parent" unless $parent;
             $node->parent($parent);
             if ($node->is_image) {
                 push(@{$parent->images},$node);
