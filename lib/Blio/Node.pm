@@ -166,6 +166,11 @@ sub id {
 
 sub is_image { 0 }
 
+sub images_by_basename {
+    my $n=shift;
+    return [sort {$a->basename cmp $b->basename}  @{$n->images}];
+}
+
 #----------------------------------------------------------------
 # url
 #----------------------------------------------------------------

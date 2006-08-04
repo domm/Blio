@@ -42,7 +42,7 @@ sub parse {
     $html=~s/\n\*/<li>/gs;
     $html=~s/<li> (.*?)\n\n/<li>$1<\/ul>/gs;
     
-    $html=~s/\n/<br>/gs;
+    $html=~s/\n\n/<br><br>/gs;
     $html=~s|\[(.*?)\s+(.*?)\]|<a href="$1">$2</a>|gs;
     
     my $teaser=$text;
