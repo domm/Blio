@@ -33,6 +33,7 @@ sub parse {
    
     my $empty=shift(@lines);  # remove seperator
     unshift(@lines,$empty) if $empty=~/\w/;
+
     my $text=join('',@lines);
 
     # transform text

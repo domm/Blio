@@ -42,7 +42,6 @@ sub register {
     my $ext=$2;
     
     my $mtime=(stat($srcpath))[9];
-    
     my $nodeclass=$class."::Txt";
     $nodeclass=$class."::Image" unless $ext eq 'txt';
     my $node=bless {
@@ -117,16 +116,7 @@ sub write {
         $i->write;
     }   
     
-    my $tt=$blio->tt;
-    $tt->process(
-        $self->template,
-        {
-            blio=>$blio,
-            node=>$self,
-        },
-        $self->url
-    ) || die $tt->error;
-
+    # sort nodes
     my $pos=0;
     my @sorted;
     foreach my $sn (sort {$b->mtime <=> $a->mtime} @{$self->nodes}) {
@@ -136,6 +126,33 @@ sub write {
         $pos++;
     }
     $self->nodes(\@sorted);
+    
+    my $tt=$blio->tt;
+    $tt->process(
+        $self->template,
+        {
+            blio=>$blio,
+            node=>$self,
+        },
+        $self->url
+    ) || die $tt->error;
+   
+    # also write index.html if node is top-node
+    if ($self->is_top) {
+        my $index_url=$self->url;
+        my $base=$self->basename;
+        $index_url=~s{$base.html}{$base/index.html};
+        print "$index_url\n";
+        $tt->process(
+            $self->template,
+            {
+                blio=>$blio,
+                node=>$self,
+            },
+            $index_url
+        ) || die $tt->error;
+    }
+    
     foreach (@sorted) { $_->write }
 }
 
