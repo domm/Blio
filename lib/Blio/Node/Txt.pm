@@ -45,7 +45,10 @@ sub parse {
     
     $html=~s/\n\n/<br><br>/gs;
     $html=~s|\[(.*?)\s+(.*?)\]|<a href="$1">$2</a>|gs;
-    
+   
+    $html=~s{\*(.*?)\*}{<b>$1</b>}gs;
+    $html=~s{_(.*?)_}{<i>$1</i>}gs;
+
     my $teaser=$text;
     $teaser=~s|\[(.*?)\s+(.*?)\]|$2|gs;
     if (length($teaser)>=150) {

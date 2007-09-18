@@ -51,16 +51,26 @@ sub collect {
     my $srcdir=$self->srcdir;
     my $outdir=$self->outdir;
 
-    find(\&ff_wanted,$srcdir);
+    find(\&ff_text,$srcdir);
+    find(\&ff_images,$srcdir);
 
 }
 
 #----------------------------------------------------------------
-# ff_wanted
+# ff_text
 #----------------------------------------------------------------
-sub ff_wanted {
+sub ff_text {
     return if $File::Find::name=~/\.svn/;
-    return unless $_=~/\.(txt|jpg|png)$/;
+    return unless $_=~/\.txt$/;
+    Blio::Node->register($File::Find::name);
+}
+
+#----------------------------------------------------------------
+# ff_images
+#----------------------------------------------------------------
+sub ff_images {
+    return if $File::Find::name=~/\.svn/;
+    return unless $_=~/\.(jpg|png)$/;
     Blio::Node->register($File::Find::name);
 }
 
