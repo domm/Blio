@@ -144,7 +144,7 @@ sub write {
         $index_url=~s{$base.html}{$base/index.html};
         print "$index_url\n";
         $tt->process(
-            $self->template,
+            $base eq 'microblog' ? 'microblog' : $self->template,
             {
                 blio=>$blio,
                 node=>$self,
