@@ -101,15 +101,17 @@ sub parse { croak "'parse' has to be implemented in Subclass!" }
 sub write {
     my $self=shift;
     my $blio=Blio->instance;
-
-    print $self->url,"\n";
+    
     # check if dir exists
     unless($self->is_top) {
         my $pdir=catdir($blio->outdir,$self->parent->id);
         unless (-d $pdir) {
             mkdir($pdir);
         }
+        my $mtime=(stat($blio->outdir.$self->url))[9];
+        return if $mtime && $mtime >= $self->mtime;
     }
+    print $self->url,"\n";
     
     # handle images
     foreach my $i (@{$self->images}) {
@@ -136,7 +138,8 @@ sub write {
         },
         $self->url
     ) || die $tt->error;
-   
+    utime($self->mtime,$self->mtime,$blio->outdir.$self->url);
+
     # also write index.html if node is top-node
     if ($self->is_top) {
         my $index_url=$self->url;
@@ -151,6 +154,7 @@ sub write {
             },
             $index_url
         ) || die $tt->error;
+        utime($self->mtime,$self->mtime,$blio->outdir.$index_url);
     }
     
     foreach (@sorted) { $_->write }
@@ -198,7 +202,6 @@ sub url {
 }
 
 8;
-
 
 __END__
 
