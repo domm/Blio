@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catdir catfile abs2rel splitpath splitdir);
 Blio::Node->mk_accessors(qw(srcpath basename ext dir dirs is_top 
     parent parent_id 
     nodes images title text teaser date mtime
-    srcfile cat template pos images));
+    srcfile cat template pos images modified));
 
 
 #----------------------------------------------------------------
@@ -52,9 +52,17 @@ sub register {
         dirs=>\@dirs,
         nodes=>[],
         images=>[],
+        modified=>$mtime,
         mtime=>$mtime,
         date=>DateTime->from_epoch(epoch=>$mtime),
     },$nodeclass;
+
+    my $sth = $blio->db->prepare("select * from blio where url = ?");
+    $sth->execute($node->url);
+    my $found = $sth->fetchrow_array;
+    unless ($found) {
+        $blio->db->do("insert into blio (url,mtime) values (?,?)",undef,$node->url,$mtime);
+    }
 
     if ($dir) {
         # print STDERR "# is dir $dir - $srcpath $basename - $local \n";
@@ -101,17 +109,20 @@ sub parse { croak "'parse' has to be implemented in Subclass!" }
 sub write {
     my $self=shift;
     my $blio=Blio->instance;
-    
+    my ($db_mtime) = $blio->db->selectrow_array("select mtime from blio where url = ?",undef,$self->url) || 0;
+
     # check if dir exists
     unless($self->is_top) {
         my $pdir=catdir($blio->outdir,$self->parent->id);
         unless (-d $pdir) {
             mkdir($pdir);
         }
-        my $mtime=(stat($blio->outdir.$self->url))[9];
-        return if $mtime && $mtime >= $self->mtime;
+        unless ($blio->force) {
+            return if $self->modified <= $db_mtime;  
+        }
     }
     print $self->url,"\n";
+    $blio->db->do("update blio set mtime = ? where url =?",undef,$self->modified,$self->url);
     
     # handle images
     foreach my $i (@{$self->images}) {
@@ -197,8 +208,14 @@ sub images_by_basename {
 #----------------------------------------------------------------
 sub url {
     my $self=shift;
-    return '/'.$self->filename if $self->is_top;
-    return join('/','',$self->dir,$self->filename);
+    my $url;
+    if ($self->is_top) {
+        $url =  '/'.$self->filename;
+    } else {
+        $url = join('/','',$self->dir,$self->filename);
+    }
+    $url=~s{^//}{/};
+    return $url;
 }
 
 8;

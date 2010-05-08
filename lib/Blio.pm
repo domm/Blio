@@ -10,6 +10,7 @@ use Carp;
 use Template;
 use DateTime;
 use File::Find;
+use DBI;
 
 use Blio::Node;
 use Blio::Node::Txt;
@@ -18,7 +19,7 @@ use Blio::Node::Image;
 $Blio::VERSION='0.02';
 
 # generate accessors
-Blio->mk_accessors(qw(basedir cats _tt topnodes allnodes));
+Blio->mk_accessors(qw(basedir cats _tt _dbh topnodes allnodes force));
 
 #----------------------------------------------------------------
 # new
@@ -130,6 +131,19 @@ sub outdir { catdir(shift->basedir,'out') }
 sub srcdir { catdir(shift->basedir,'src') }
 sub tpldir { catdir(shift->basedir,'templates') }
 sub catdirs { keys %{shift->cats} }
+sub dbfile {
+    catfile(shift->basedir,'sqlite','blio.db');
+}
+sub db {
+    my $self = shift;
+    return $self->_dbh if $self->_dbh;
+
+    $self->_dbh(DBI->connect("dbi:SQLite:dbname=".$self->dbfile));
+    return $self->_dbh;
+
+}
+
+
 8;
 
 
