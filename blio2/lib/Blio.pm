@@ -8,42 +8,77 @@ use Blio::Node;
 
 with 'MooseX::Getopt';
 
-
-has 'source_dir' => (is=>'ro',isa=>'Path::Class::Dir',required=>1,coerce=>1, lazy_build=>1);
-has 'output_dir' => (is=>'ro',isa=>'Path::Class::Dir',required=>1,coerce=>1, lazy_build=>1);
-has 'nodes_by_url' => (is=>'ro',isa=>'HashRef',default=>sub {{}});
-has 'tree' => (is=>'ro',isa=>'ArrayRef[Blio::Node]',default=>sub {[]});
-
+has 'source_dir' => (
+    is         => 'ro',
+    isa        => 'Path::Class::Dir',
+    required   => 1,
+    coerce     => 1,
+    lazy_build => 1
+);
 sub _build_source_dir {
+    my $self = shift;
     return Path::Class::Dir->new->subdir('src');
 }
-sub _build_outout_dir {
+
+has 'output_dir' => (
+    is         => 'ro',
+    isa        => 'Path::Class::Dir',
+    required   => 1,
+    coerce     => 1,
+    lazy_build => 1
+);
+sub _build_output_dir {
+    my $self = shift;
     return Path::Class::Dir->new->subdir('out');
 }
 
+has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
+has 'tree' => (
+    is      => 'ro',
+    isa     => 'ArrayRef[Blio::Node]',
+    default => sub { [] },
+    traits  => ['Array'],
+    handles => { add_top_node => 'push', },
+);
 
 sub run {
     my $self = shift;
 
     $self->collect;
-
 }
-
 
 sub collect {
-    my $self = shift;
-    my $iterator = Path::Class::Iterator->new(root => $self->source_dir);
-    until ($iterator->done) {
+    my $self     = shift;
+    my $iterator = Path::Class::Iterator->new(
+        root          => $self->source_dir,
+        breadth_first => 1,
+    );
+
+    until ( $iterator->done ) {
         my $file = $iterator->next;
-        
-        
-        
-        say $file;
+        next if -d $file;
+
+        my $node = Blio::Node->new_from_file( $self->source_dir, $file );
+        $self->nodes_by_url->{ $node->url } = $node;
+
+        if ( $node->source_file->parent->stringify eq
+            $self->source_dir->stringify ) {
+            $self->add_top_node($node);
+        }
+        else {
+            my $possible_parent_url = $node->url;
+            $possible_parent_url =~ s{/\w+.html$}{/index.html};
+            if ( my $parent = $self->nodes_by_url->{$possible_parent_url} ) {
+                $node->parent($parent);
+                $parent->add_child($node);
+            }
+            else {
+                say "Cannote find parent, but not a root node: " . $node->url;
+                exit 0;
+            }
+        }
     }
-
 }
-
-
 
 __PACKAGE__->meta->make_immutable;
 1;

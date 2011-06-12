@@ -16,17 +16,23 @@ coerce 'DateTime' => from 'Int' => via {
 has 'base_dir' => ( is => 'ro', isa => 'Path::Class::Dir', required => 1 );
 has 'source_file' =>
     ( is => 'ro', isa => 'Path::Class::File', required => 1, coerce => 1 );
+has 'id' => (is => 'ro', isa=>'Str', required=>1, lazy_build=>1);
+sub _build_id {
+    my $self = shift;
+    my $path = $self->source_file->relative($self->base_dir)->stringify;
+    $path=~s/\.txt$//;
+    return $path;
+}
 has 'url' => ( is => 'ro', isa => 'Str', lazy_build => 1 );
 sub _build_url {
     my $self = shift;
-    my $path = $self->source_file->stringify;
-    if ( $self->has_children ) {
-        $path =~ s{\.txt$}{/index.html};
+    my $id = $self->id;
+    if (-d $self->source_file->parent->subdir($id) ) {
+        return $id.'/index.html';
     }
     else {
-        $path =~ s/\.txt$/.html/;
+        return $id.'.html';
     }
-    return $path;
 }
 
 has 'title' => ( is => 'ro', isa => 'Str', required => 1 );
@@ -39,7 +45,7 @@ has 'date' => (
 );
 sub _build_date {
     my $self = shift;
-    my $stat = $self->base_dir->file( $self->source_file )->stat;
+    my $stat = $self->source_file->stat;
     return $stat->mtime;
 }
 has 'raw_content'      => ( is => 'ro', isa => 'Str' );
@@ -59,10 +65,13 @@ has 'children' => (
     isa     => 'ArrayRef[Blio::Node]',
     default => sub { [] },
     traits  => ['Array'],
-    handles => { has_children => 'count', },
+    handles => {
+        has_children => 'count',
+        add_child    => 'push',
+    },
 
 );
-has 'parent' => ( is => 'ro', isa => 'Maybe[Blio::Node]' );
+has 'parent' => ( is => 'rw', isa => 'Maybe[Blio::Node]', weak_ref => 1);
 
 sub new_from_file {
     my ( $class, $base, $file ) = @_;
@@ -74,7 +83,7 @@ sub new_from_file {
     my ( $header, $raw_content ) = $class->parse(@lines);
     my $node = $class->new(
         base_dir    => $base,
-        source_file => $file->relative($base),
+        source_file => $file,
         %$header,
         raw_content => $raw_content,
     );

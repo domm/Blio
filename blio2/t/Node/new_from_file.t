@@ -13,7 +13,7 @@ my $base = Path::Class::dir(qw(. t testdata site1));
 {
     my $node = Blio::Node->new_from_file($base, file(qw(. t testdata site1 blog.txt)));
     
-    is($node->source_file,'blog.txt','source_file');
+    is($node->source_file->relative($base),'blog.txt','source_file');
     is($node->url,'blog.html','url');
 
     is($node->title,'A Blog','title');
@@ -23,11 +23,9 @@ my $base = Path::Class::dir(qw(. t testdata site1));
 
 {
     my $node = Blio::Node->new_from_file($base, file(qw(. t testdata site1 books.txt)));
-    
-    TODO: { 
-        local $TODO='children not implemented yet';
-        is($node->url,'books/index.html','url');
-    };
+   
+    $node->add_child($node); # urks..
+    is($node->url,'books/index.html','url');
     
     is($node->title,'Books','title');
     is($node->date,'2010-01-01T00:00:00','date from header');
