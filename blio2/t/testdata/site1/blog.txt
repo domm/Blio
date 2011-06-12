@@ -1,0 +1,3 @@
+title: A Blog
+
+This is a blog

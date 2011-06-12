@@ -4,6 +4,7 @@ use Moose;
 use MooseX::Types::Path::Class;
 use Path::Class::Iterator;
 
+use Blio::Node;
 
 with 'MooseX::Getopt';
 
@@ -31,10 +32,12 @@ sub run {
 
 sub collect {
     my $self = shift;
-say $self->source_dir;
     my $iterator = Path::Class::Iterator->new(root => $self->source_dir);
     until ($iterator->done) {
         my $file = $iterator->next;
+        
+        
+        
         say $file;
     }
 
