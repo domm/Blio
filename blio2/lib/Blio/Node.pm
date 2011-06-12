@@ -12,34 +12,51 @@ coerce 'DateTime'
     => from 'Str'
     => via { DateTime::Format::ISO8601->parse_datetime($_) };
 
+has 'base_dir' => (is=>'ro',isa=>'Path::Class::Dir',required=>1);
 has 'source_file'=>(is=>'ro',isa=>'Path::Class::File',required=>1,coerce=>1);
-#has 'output_file'=>(is=>'ro',isa=>'Path::Class::File',required=>1,coerce=>1);
-#has 'url'=>(is=>'ro',isa=>'Str',required=>1);
+has 'url'=>(is=>'ro',isa=>'Str',lazy_build=>1);
+sub _build_url {
+    my $self = shift;
+    my $path = $self->source_file->stringify;
+    if ($self->has_children) {
+        $path=~s{\.txt$}{/index.html};
+    }
+    else {
+        $path=~s/\.txt$/.html/;
+    }
+    return $path;
+}
+
 has 'title' => (is=>'ro',isa=>'Str',required=>1);
 has 'date' => (is=>'ro',isa=>'DateTime',required=>1, lazy_build=>1, coerce=>1);
 sub _build_date {
     my $self = shift;
-    my $stat = $self->source_file->stat;
+    my $stat = $self->base_dir->file($self->source_file)->stat;
     return $stat->mtime;
 }
 has 'raw_content' => (is=>'ro',isa=>'Str'); 
 has 'rendered_content' => (is=>'rw',isa=>'Str');
 has 'tags' => (is=>'rw',isa=>'ArrayRef',default=>sub {[]}, traits  => ['Array']);
 has 'images' => (is=>'rw',isa=>'ArrayRef[Blio::Image]',default=>sub {[]}, traits  => ['Array']);
-has 'children' => (is=>'rw',isa=>'ArrayRef[Blio::Node]',default=>sub {[]}, traits  => ['Array']);
+has 'children' => (is=>'rw',isa=>'ArrayRef[Blio::Node]',default=>sub {[]}, traits  => ['Array'],
+handles=>{
+    has_children=>'count',    
+},
+
+);
 has 'parent' => (is=>'ro',isa=>'Maybe[Blio::Node]');
 
 sub new_from_file {
-    my ($class, $file) = @_;
+    my ($class, $base, $file) = @_;
 
     my @lines = $file->slurp(
         chomp => 1,
         iomode => '<:encoding(UTF-8)',
     );
     my ($header, $raw_content) = $class->parse(@lines);
-
     my $node = $class->new(
-        source_file=>$file,
+        base_dir=>$base,
+        source_file=>$file->relative($base),
         %$header,
         raw_content=>$raw_content,
     );
