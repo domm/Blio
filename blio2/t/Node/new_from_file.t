@@ -19,8 +19,6 @@ my $base = Path::Class::dir(qw(. t testdata site1));
     is($node->title,'A Blog','title');
     is($node->date,'2011-06-12T15:46:37','date from mtime');
     is($node->parent,undef,'no parent');
-
-
 }
 
 {
