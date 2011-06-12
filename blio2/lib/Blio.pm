@@ -2,7 +2,10 @@ package Blio;
 use 5.010;
 use Moose;
 use MooseX::Types::Path::Class;
+use Path::Class;
 use Path::Class::Iterator;
+use Template;
+use File::ShareDir qw(dist_dir);
 
 use Blio::Node;
 
@@ -32,6 +35,19 @@ sub _build_output_dir {
     return Path::Class::Dir->new->subdir('out');
 }
 
+has 'template_dir' => (
+    is         => 'ro',
+    isa        => 'Path::Class::Dir',
+    required   => 1,
+    coerce     => 1,
+    lazy_build => 1
+);
+sub _build_template_dir {
+    my $self = shift;
+    return Path::Class::Dir->new->subdir('temp;ates');
+}
+
+
 has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 has 'tree' => (
     is      => 'ro',
@@ -40,12 +56,25 @@ has 'tree' => (
     traits  => ['Array'],
     handles => { add_top_node => 'push', },
 );
-
-sub run {
+has 'tt' => (
+    is=>'ro',
+    isa=>'Template',
+    lazy_build => 1
+);
+sub _build_tt {
     my $self = shift;
-
-    $self->collect;
+    return Template->new({
+        OUTPUT_PATH=>$self->output_dir->stringify,
+        INCLUDE_PATH=>[$self->template_dir->stringify, dir(dist_dir('Blio'),'templates')->stringify],
+        WRAPPER=>'wrapper.tt',
+    });
 }
+
+#sub run {
+#    my $self = shift;
+#
+#    $self->collect;
+#}
 
 sub collect {
     my $self     = shift;
@@ -79,6 +108,15 @@ sub collect {
         }
     }
 }
+
+sub write {
+    my $self = shift;
+    
+    while (my ($url, $node) = each %{$self->nodes_by_url}) {
+        $node->write($self);
+    }
+}
+
 
 __PACKAGE__->meta->make_immutable;
 1;

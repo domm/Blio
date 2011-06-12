@@ -1,0 +1,4 @@
+<h2>[% node.title %]</h2>
+
+[% node.content %]
+

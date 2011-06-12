@@ -35,6 +35,7 @@ sub _build_url {
     }
 }
 
+has 'template' => (is=>'ro',isa=>'Str',required=>1,default=>'node.tt');
 has 'title' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'date' => (
     is         => 'ro',
@@ -102,6 +103,23 @@ sub parse {
     }
     my $content = join( "\n", @lines );
     return \%header, $content;
+}
+
+sub write {
+    my ($self, $blio) = @_;
+
+    my $tt = $blio->tt;
+    
+    my $outfile = $blio->output_dir->file($self->url);
+    $outfile->parent->mkpath unless (-d $outfile->parent);
+    
+    $tt->process($self->template,
+        {
+            node=>$self,
+            blio=>$blio,
+        },
+        $outfile->relative($blio->output_dir)->stringify,
+    ) || die $tt->error;
 }
 
 __PACKAGE__->meta->make_immutable;
