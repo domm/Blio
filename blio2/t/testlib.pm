@@ -13,7 +13,7 @@ sub blio {
     return Blio->new(
         output_dir=>testdir(),
         source_dir=>Path::Class::dir(qw(. t testdata ),$site),
-        templates_dir=>Path::Class::dir(qw(. share templates)),
+        template_dir=>Path::Class::dir(qw(. share templates)),
     );
 }
 
