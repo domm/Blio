@@ -122,5 +122,13 @@ sub write {
     ) || die $tt->error;
 }
 
+sub relative_url {
+    my $self = shift;
+    my $url = $self->url;
+    my @level = $url=~m{/}g;
+    return $url unless @level;
+    return join('/',map { '..' } @level).'/'.$url;
+}
+
 __PACKAGE__->meta->make_immutable;
 1;

@@ -1,0 +1,1 @@
+[% blio.site_title %]: [% node.title %]

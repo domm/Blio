@@ -47,6 +47,8 @@ sub _build_template_dir {
     return Path::Class::Dir->new->subdir('temp;ates');
 }
 
+has 'root' => (is=>'ro',isa=>'Str',default=>'/',required=>1);
+has 'site_title' => (is=>'ro',isa=>'Str',default=>'Blio',required=>1);
 
 has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 has 'tree' => (
@@ -70,11 +72,12 @@ sub _build_tt {
     });
 }
 
-#sub run {
-#    my $self = shift;
-#
-#    $self->collect;
-#}
+sub run {
+    my $self = shift;
+
+    $self->collect;
+    $self->write;
+}
 
 sub collect {
     my $self     = shift;

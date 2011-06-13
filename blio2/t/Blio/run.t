@@ -16,8 +16,7 @@ my $blio = Blio->new(
     source_dir => Path::Class::dir(qw(. t testdata site1)),
     output_dir => $out,
 );
-$blio->collect;
-$blio->write;
+$blio->run;
 
 file_exists_ok( $out->file('blog.html') );
 file_exists_ok( $out->file('movies/index.html') );

@@ -2,3 +2,11 @@
 
 [% node.content %]
 
+[% IF node.has_children %]
+<ul>
+[% FOREACH child IN node.children %]
+  <li><a href="[% child.relative_url %]">[% child.title %]</a></li>
+[% END %]
+</ul>
+[% END %]
+
