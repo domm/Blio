@@ -102,7 +102,6 @@ has 'parent' => ( is => 'rw', isa => 'Maybe[Blio::Node]', weak_ref => 1);
 
 sub new_from_file {
     my ( $class, $blio, $file ) = @_;
-    say $file;
     my @lines = $file->slurp(
         chomp  => 1,
         iomode => '<:encoding(UTF-8)',
