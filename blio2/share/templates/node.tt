@@ -4,7 +4,7 @@
 
 [% IF node.has_children %]
 <ul>
-[% FOREACH child IN node.children %]
+[% FOREACH child IN node.sorted_children %]
   <li><a href="[% node.relative_root%][% child.url %]">[% child.title %]</a></li>
 [% END %]
 </ul>

@@ -16,8 +16,6 @@ use Blio::Node;
 my $blio = testlib::blio('site1');
 
 {
-    explain($blio->template_dir->stringify);
-    explain($blio->source_dir->stringify);
     my $node =
         Blio::Node->new_from_file( $blio,
         file(qw(. t testdata site1 books un_lun_dun.txt)) );

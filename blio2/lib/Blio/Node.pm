@@ -166,5 +166,14 @@ sub possible_parent_url {
     return $ppurl;
 }
 
+sub sorted_children {
+    my $self = shift;
+    my @sorted = 
+        map { $_->[0] }
+        sort { $b->[1] <=> $a->[1] }
+        map { [$_ => $_->date->epoch] } @{$self->children};
+    return \@sorted;
+}
+
 __PACKAGE__->meta->make_immutable;
 1;
