@@ -49,6 +49,7 @@ sub _build_template_dir {
 
 has 'name' => (is=>'ro',isa=>'Str',default=>'Blio',required=>1);
 has 'language' => (is=>'ro',isa=>'Str',default=>'en',required=>1);
+has 'converter' => (is=>'ro',isa=>'Maybe[Str]',default=>undef,required=>1);
 
 has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 has 'tree' => (

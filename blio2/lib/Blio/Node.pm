@@ -95,6 +95,8 @@ sub new_from_file {
     my ( $header, $raw_content ) = $class->parse(@lines);
     my $node = $class->new(
         base_dir    => $blio->source_dir,
+        language    => $blio->language,
+        converter   => $blio->converter,
         source_file => $file,
         %$header,
         raw_content => encode_utf8($raw_content),
