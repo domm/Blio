@@ -15,18 +15,16 @@ has 'url' => (is=>'ro');
 package main;
 
 my %tests = (
-    'phoon.html' => 'phoon.html',
-    'phoon/index.html' => '../phoon/index.html',
-    'SPITZ/SPOPPLE/SPATZ.html' => '../../SPITZ/SPOPPLE/SPATZ.html',
-    'ZZT/CHOMP/index.html' => '../../ZZT/CHOMP/index.html',
-    'ZZT/CHOMP.html' => '../ZZT/CHOMP.html',
-    'ZZT/CHOMP/fowf.html' => '../../ZZT/CHOMP/fowf.html',
+    'phoon.html' => '',
+    'SPITZ/SPOPPLE/SPATZ.html' => '../../',
+    'ZZT/CHOMP.html' => '../',
+    'ZZT/CHOMP/fowf.html' => '../../',
 
 );
 while (my ($url,$expect) = each %tests) {
     my $node = Blio::TestNode->new(url=>$url);
     bless $node, 'Blio::Node';
-    is($node->relative_url,$expect,"$url => $expect");
+    is($node->relative_root,$expect,"$url => $expect");
 
 }
 

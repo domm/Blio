@@ -6,6 +6,7 @@ use MooseX::Types::Path::Class;
 use Moose::Util::TypeConstraints;
 use DateTime::Format::ISO8601;
 use Encode;
+use Markup::Unified;
 
 class_type 'DateTime';
 coerce 'DateTime' => from 'Int' => via {
@@ -27,13 +28,7 @@ sub _build_id {
 has 'url' => ( is => 'ro', isa => 'Str', lazy_build => 1 );
 sub _build_url {
     my $self = shift;
-    my $id = $self->id;
-    if (-d $self->source_file->parent->subdir($id) ) {
-        return $id.'/index.html';
-    }
-    else {
-        return $id.'.html';
-    }
+    return $self->id.'.html';
 }
 
 has 'template' => (is=>'ro',isa=>'Str',required=>1,default=>'node.tt');
@@ -61,12 +56,12 @@ sub _build_content {
     my $converter = $self->converter;
     my $raw_content = $self->raw_content;
     return $raw_content unless $converter;
-warn "Converter $converter";
+    
     given ($converter) {
         when ('html') { return $raw_content }
         when ([qw(textile markdown bbcode)]) {
             my $o = Markup::Unified->new();
-            return $o->format($raw_content, 'textile');
+            return $o->format($raw_content, 'textile')->formatted;
         }
         when ('domm_legacy') {
             return $self->convert_domm_legacy($raw_content);
@@ -107,7 +102,7 @@ has 'parent' => ( is => 'rw', isa => 'Maybe[Blio::Node]', weak_ref => 1);
 
 sub new_from_file {
     my ( $class, $blio, $file ) = @_;
-
+    say $file;
     my @lines = $file->slurp(
         chomp  => 1,
         iomode => '<:encoding(UTF-8)',
@@ -158,12 +153,21 @@ sub write {
     utime($utime,$utime,$outfile->stringify);
 }
 
-sub relative_url {
+sub relative_root {
     my $self = shift;
     my $url = $self->url;
     my @level = $url=~m{/}g;
-    return $url unless @level;
-    return join('/',map { '..' } @level).'/'.$url;
+    
+    return '' unless @level;
+    
+    return join('/',map { '..' } @level).'/';
+}
+
+sub possible_parent_url {
+    my $self = shift;
+    my $ppurl = $self->url;
+    $ppurl =~ s{/\w+.html$}{.html};
+    return $ppurl;
 }
 
 sub convert_domm_legacy {

@@ -100,11 +100,11 @@ sub collect {
             $self->add_top_node($node);
         }
         else {
-            my $possible_parent_url = $node->url;
-            $possible_parent_url =~ s{/\w+.html$}{/index.html};
+            my $possible_parent_url = $node->possible_parent_url;
             if ( my $parent = $self->nodes_by_url->{$possible_parent_url} ) {
                 $node->parent($parent);
                 $parent->add_child($node);
+                #say $node->url .' is child of '.$parent->url;
             }
             else {
                 say "Cannote find parent, but not a root node: " . $node->url;

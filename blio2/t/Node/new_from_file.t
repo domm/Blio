@@ -31,7 +31,7 @@ my $base = $blio->source_dir;
     my $node = Blio::Node->new_from_file($blio, file(qw(. t testdata site1 books.txt)));
    
     $node->add_child($node); # urks..
-    is($node->url,'books/index.html','url');
+    is($node->url,'books.html','url');
     
     is($node->title,'Books','title');
     is($node->date,'2010-01-01T00:00:00','date from header');
