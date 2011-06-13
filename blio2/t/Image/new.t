@@ -20,7 +20,7 @@ my $base = $blio->source_dir;
         base_dir=>$blio->source_dir,
         source_file=>$blio->source_dir->file(qw(iceland geysir_images geysir_1.jpg)),
     );
-    is($image->target_file->stringify,'iceland/geysir_images/geysir_1.jpg','target');
+    is($image->url->stringify,'iceland/geysir_images/geysir_1.jpg','target');
     is($image->thumbnail->stringify,'iceland/geysir_images/th_geysir_1.jpg','thumbnail');
 }
 

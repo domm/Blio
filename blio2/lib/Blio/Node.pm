@@ -132,8 +132,6 @@ sub new_from_file {
                 source_file => $image_file,
             );
             $node->add_image($img);
-
-
         }
     }
 
@@ -206,6 +204,15 @@ sub sorted_children {
         map { $_->[0] }
         sort { $b->[1] <=> $a->[1] }
         map { [$_ => $_->date->epoch] } @{$self->children};
+    return \@sorted;
+}
+
+sub sorted_images {
+    my $self = shift;
+    my @sorted = 
+        map { $_->[0] }
+        sort { $a->[1] cmp $b->[1] }
+        map { [$_ => $_->source_file->basename ] } @{$self->images};
     return \@sorted;
 }
 

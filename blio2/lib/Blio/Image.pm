@@ -10,9 +10,9 @@ use Imager;
 has 'base_dir' => ( is => 'ro', isa => 'Path::Class::Dir', required => 1 );
 has 'source_file' =>
     ( is => 'ro', isa => 'Path::Class::File', required => 1 );
-has 'target_file' =>
+has 'url' =>
     ( is => 'ro', isa => 'Path::Class::File', required => 1, lazy_build=>1 );
-sub _build_target_file {
+sub _build_url {
     my $self = shift;
     return $self->source_file->relative($self->base_dir);
 }
@@ -28,16 +28,16 @@ sub _build_thumbnail {
 sub publish {
     my ($self, $blio) = @_;
 
-    $blio->output_dir->file($self->target_file)->parent->mkpath;
+    $blio->output_dir->file($self->url)->parent->mkpath;
     my $from = $self->source_file->stringify;
-    my $to = $blio->output_dir->file($self->target_file)->stringify;
+    my $to = $blio->output_dir->file($self->url)->stringify;
     copy($from, $to) || die "Cannot copy $from to $to: $!";
 }
 
 sub make_thumbnail {
     my ($self, $blio) = @_;
 
-    $blio->output_dir->file($self->target_file)->parent->mkpath;
+    $blio->output_dir->file($self->url)->parent->mkpath;
     my $file = $self->source_file->stringify;
     my $target = $blio->output_dir->file($self->thumbnail)->stringify;
     my $image = Imager->new;
@@ -45,7 +45,6 @@ sub make_thumbnail {
     my $thumbnail = $image->scale(xpixels => 300) || die "Cannot scale $file: ".$image->errstr;
     $thumbnail->write( file => $target ) || die "Cannot write thumbnail $target" . $thumbnail->errstr;
 }
-
 
 __PACKAGE__->meta->make_immutable;
 1;
