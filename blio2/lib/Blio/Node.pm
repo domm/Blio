@@ -59,8 +59,28 @@ has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
 sub _build_content {
     my $self = shift;
     my $converter = $self->converter;
-    return $self->raw_content;
-
+    my $raw_content = $self->raw_content;
+    return $raw_content unless $converter;
+warn "Converter $converter";
+    given ($converter) {
+        when ('html') { return $raw_content }
+        when ([qw(textile markdown bbcode)]) {
+            my $o = Markup::Unified->new();
+            return $o->format($raw_content, 'textile');
+        }
+        when ('domm_legacy') {
+            return $self->convert_domm_legacy($raw_content);
+        }
+        default {
+            my $method = 'convert_'.$converter;
+            if ($self->can($method)) {
+                return $self->$method($raw_content);
+            }
+            else {
+                return "<pre>No such converter: $converter</pre>".$raw_content;
+            }
+        }
+    }
 }
 has 'tags'             => (
     is      => 'rw',
@@ -125,14 +145,17 @@ sub write {
     
     my $outfile = $blio->output_dir->file($self->url);
     $outfile->parent->mkpath unless (-d $outfile->parent);
-    
+
     $tt->process($self->template,
         {
             node=>$self,
             blio=>$blio,
         },
-        $outfile->relative($blio->output_dir)->stringify,
+        ,$outfile->relative($blio->output_dir)->stringify
     ) || die $tt->error;
+
+    my $utime = $self->date->epoch;
+    utime($utime,$utime,$outfile->stringify);
 }
 
 sub relative_url {
@@ -141,6 +164,11 @@ sub relative_url {
     my @level = $url=~m{/}g;
     return $url unless @level;
     return join('/',map { '..' } @level).'/'.$url;
+}
+
+sub convert_domm_legacy {
+    my ($self, $raw) = @_;
+    return $raw;
 }
 
 __PACKAGE__->meta->make_immutable;
