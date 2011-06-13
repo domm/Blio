@@ -5,6 +5,7 @@ use namespace::autoclean;
 use MooseX::Types::Path::Class;
 use Moose::Util::TypeConstraints;
 use DateTime::Format::ISO8601;
+use Encode;
 
 class_type 'DateTime';
 coerce 'DateTime' => from 'Int' => via {
@@ -49,8 +50,18 @@ sub _build_date {
     my $stat = $self->source_file->stat;
     return $stat->mtime;
 }
+
+has 'language' => (is=>'ro', isa=>'Maybe[Str]');
+has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
+
 has 'raw_content'      => ( is => 'ro', isa => 'Str' );
-has 'rendered_content' => ( is => 'rw', isa => 'Str' );
+has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
+sub _build_content {
+    my $self = shift;
+    my $converter = $self->converter;
+    return $self->raw_content;
+
+}
 has 'tags'             => (
     is      => 'rw',
     isa     => 'ArrayRef',
@@ -75,7 +86,7 @@ has 'children' => (
 has 'parent' => ( is => 'rw', isa => 'Maybe[Blio::Node]', weak_ref => 1);
 
 sub new_from_file {
-    my ( $class, $base, $file ) = @_;
+    my ( $class, $blio, $file ) = @_;
 
     my @lines = $file->slurp(
         chomp  => 1,
@@ -83,10 +94,10 @@ sub new_from_file {
     );
     my ( $header, $raw_content ) = $class->parse(@lines);
     my $node = $class->new(
-        base_dir    => $base,
+        base_dir    => $blio->source_dir,
         source_file => $file,
         %$header,
-        raw_content => $raw_content,
+        raw_content => encode_utf8($raw_content),
     );
 
     return $node;
@@ -99,7 +110,7 @@ sub parse {
         last if $line =~ /\^s+$/;
         last unless $line =~ /:/;
         my ( $key, $value ) = split( /\s*:\s*/, $line, 2 );
-        $header{ lc($key) } = $value;
+        $header{ lc($key) } = encode_utf8($value);
     }
     my $content = join( "\n", @lines );
     return \%header, $content;

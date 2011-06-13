@@ -44,11 +44,11 @@ has 'template_dir' => (
 );
 sub _build_template_dir {
     my $self = shift;
-    return Path::Class::Dir->new->subdir('temp;ates');
+    return Path::Class::Dir->new->subdir('templates');
 }
 
-has 'root' => (is=>'ro',isa=>'Str',default=>'/',required=>1);
-has 'site_title' => (is=>'ro',isa=>'Str',default=>'Blio',required=>1);
+has 'name' => (is=>'ro',isa=>'Str',default=>'Blio',required=>1);
+has 'language' => (is=>'ro',isa=>'Str',default=>'en',required=>1);
 
 has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 has 'tree' => (
@@ -69,6 +69,7 @@ sub _build_tt {
         OUTPUT_PATH=>$self->output_dir->stringify,
         INCLUDE_PATH=>[$self->template_dir->stringify, dir(dist_dir('Blio'),'templates')->stringify],
         WRAPPER=>'wrapper.tt',
+        ENCODING     => 'utf-8',
     });
 }
 
@@ -90,7 +91,7 @@ sub collect {
         my $file = $iterator->next;
         next if -d $file;
 
-        my $node = Blio::Node->new_from_file( $self->source_dir, $file );
+        my $node = Blio::Node->new_from_file( $self, $file );
         $self->nodes_by_url->{ $node->url } = $node;
 
         if ( $node->source_file->parent->stringify eq
