@@ -7,6 +7,7 @@ use Moose::Util::TypeConstraints;
 use DateTime::Format::ISO8601;
 use Encode;
 use Markup::Unified;
+use Blio::Image;
 
 class_type 'DateTime';
 coerce 'DateTime' => from 'Int' => via {
@@ -83,7 +84,12 @@ has 'images' => (
     is      => 'rw',
     isa     => 'ArrayRef[Blio::Image]',
     default => sub { [] },
-    traits  => ['Array'] );
+    traits  => ['Array'],
+    handles => {
+        has_images   => 'count',
+        add_image    => 'push',
+    },
+    );
 has 'children' => (
     is      => 'rw',
     isa     => 'ArrayRef[Blio::Node]',
@@ -103,6 +109,7 @@ sub new_from_file {
         chomp  => 1,
         iomode => '<:encoding(UTF-8)',
     );
+    #warn $file;
     my ( $header, $raw_content ) = $class->parse(@lines);
     my $node = $class->new(
         base_dir    => $blio->source_dir,
@@ -112,6 +119,23 @@ sub new_from_file {
         %$header,
         raw_content => encode_utf8($raw_content),
     );
+
+    # check and add images
+    my $img_dir = $file->basename;
+    $img_dir=~s/\.txt$//;
+    $img_dir = $file->parent->subdir($img_dir.'_images');
+    if (-d $img_dir) {
+        while (my $image_file = $img_dir->next) {
+            next unless $image_file =~ /\.jpe?g$/;
+            my $img = Blio::Image->new(
+                base_dir    => $blio->source_dir,
+                source_file => $image_file,
+            );
+            $node->add_image($img);
+
+
+        }
+    }
 
     return $node;
 }
@@ -147,6 +171,15 @@ sub write {
 
     my $utime = $self->date->epoch;
     utime($utime,$utime,$outfile->stringify);
+
+    if ($self->has_images) {
+        foreach my $img (@{$self->images}) {
+            unless (-e $blio->output_dir->file($img->thumbnail)) {
+                $img->publish($blio);
+                $img->make_thumbnail($blio);
+            }
+        }
+    }
 }
 
 sub relative_root {

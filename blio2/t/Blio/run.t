@@ -14,7 +14,6 @@ use Path::Class;
 
 my $blio = testlib::blio('site1');
 
-
 $blio->run;
 
 file_exists_ok( $blio->output_dir->file('blog.html') );

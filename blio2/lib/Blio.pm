@@ -91,6 +91,7 @@ sub collect {
     until ( $iterator->done ) {
         my $file = $iterator->next;
         next if -d $file;
+        next unless $file =~ /\.txt$/;
 
         my $node = Blio::Node->new_from_file( $self, $file );
         $self->nodes_by_url->{ $node->url } = $node;

@@ -10,3 +10,8 @@
 </ul>
 [% END %]
 
+[% FOREACH top_node IN blio.tree %]
+<a href="[% node.relative_root%][% top_node.url %]">[% top_node.title %]</a>
+[% ' | ' UNLESS loop.last %]
+[% END %]
+

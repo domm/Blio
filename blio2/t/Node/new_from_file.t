@@ -49,4 +49,9 @@ my $base = $blio->source_dir;
     is($node->converter,'test','converter: test');
 }
 
+{
+    my $node = Blio::Node->new_from_file($blio, file(qw(. t testdata site_images iceland geysir.txt)));
+    is($node->has_images,2,'has 2 images');
+
+}
 done_testing();
