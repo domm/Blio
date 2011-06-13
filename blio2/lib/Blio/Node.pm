@@ -63,9 +63,6 @@ sub _build_content {
             my $o = Markup::Unified->new();
             return $o->format($raw_content, 'textile')->formatted;
         }
-        when ('domm_legacy') {
-            return $self->convert_domm_legacy($raw_content);
-        }
         default {
             my $method = 'convert_'.$converter;
             if ($self->can($method)) {
@@ -167,11 +164,6 @@ sub possible_parent_url {
     my $ppurl = $self->url;
     $ppurl =~ s{/\w+.html$}{.html};
     return $ppurl;
-}
-
-sub convert_domm_legacy {
-    my ($self, $raw) = @_;
-    return $raw;
 }
 
 __PACKAGE__->meta->make_immutable;
