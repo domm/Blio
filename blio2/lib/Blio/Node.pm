@@ -165,6 +165,7 @@ sub write {
         {
             node=>$self,
             blio=>$blio,
+            base=>$self->relative_root,
         },
         ,$outfile->relative($blio->output_dir)->stringify
     ) || die $tt->error;
