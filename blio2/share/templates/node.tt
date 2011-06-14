@@ -4,7 +4,7 @@
 
 [% IF node.has_images %]
 <ul>
-[% FOREACH image IN node.images %]
+[% FOREACH image IN node.sorted_images %]
 <li>
 <a href="[% base %][% image.target_file %]"><img src="[% base %][% image.thumbnail %]" border="0"></a>
 </li>
