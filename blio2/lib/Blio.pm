@@ -51,18 +51,22 @@ has 'name' => (is=>'ro',isa=>'Str',default=>'Blio',required=>1);
 has 'language' => (is=>'ro',isa=>'Str',default=>'en',required=>1);
 has 'converter' => (is=>'ro',isa=>'Maybe[Str]',default=>undef,required=>1);
 
-has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
+has 'force' => (is=>'ro',isa=>'Bool',default=>0);
+has 'quiet' => (is=>'ro',isa=>'Bool',default=>0);
+
+has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } ,traits  => [ 'NoGetopt' ]);
 has 'tree' => (
     is      => 'ro',
     isa     => 'ArrayRef[Blio::Node]',
     default => sub { [] },
-    traits  => ['Array'],
+    traits  => ['Array', 'NoGetopt'],
     handles => { add_top_node => 'push', },
 );
 has 'tt' => (
     is=>'ro',
     isa=>'Template',
-    lazy_build => 1
+    lazy_build => 1,
+    traits  => [ 'NoGetopt' ],
 );
 sub _build_tt {
     my $self = shift;
@@ -119,6 +123,7 @@ sub write {
     my $self = shift;
     
     while (my ($url, $node) = each %{$self->nodes_by_url}) {
+        say "writing $url" unless $self->quiet;
         $node->write($self);
     }
 }
