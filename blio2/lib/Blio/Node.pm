@@ -173,7 +173,8 @@ sub write {
 
     if ($self->has_images) {
         foreach my $img (@{$self->images}) {
-            unless (-e $blio->output_dir->file($img->thumbnail)) {
+            if ($blio->force || !-e $blio->output_dir->file($img->thumbnail)) {
+                say "\timage ".$img->url unless $blio->quiet;
                 $img->publish($blio);
                 $img->make_thumbnail($blio);
             }
