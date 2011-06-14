@@ -1,5 +1,8 @@
 package Blio;
 use 5.010;
+
+our $VERSION = 2.000;
+
 use Moose;
 use MooseX::Types::Path::Class;
 use Path::Class;
