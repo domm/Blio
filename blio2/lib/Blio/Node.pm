@@ -32,7 +32,7 @@ sub _build_url {
     return $self->id.'.html';
 }
 
-has 'template' => (is=>'ro',isa=>'Str',required=>1,default=>'node.tt');
+has 'template' => (is=>'rw',isa=>'Str',required=>1,default=>'node.tt');
 has 'title' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'date' => (
     is         => 'ro',
