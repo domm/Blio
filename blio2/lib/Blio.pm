@@ -115,10 +115,24 @@ sub collect {
                 #say $node->url .' is child of '.$parent->url;
             }
             else {
-                say "Cannote find parent, but not a root node: " . $node->url;
+                say "Cannot find parent, but not a root node: " . $node->url;
                 exit 0;
             }
         }
+    }
+
+    unless ($self->nodes_by_url->{'index.html'}) {
+        my $index = Blio::Node->new(
+            base_dir => $blio->source_dir,
+            source_file => dir('.'),
+            id=>'index.html',
+            url=>'index.html',
+            title=>'Index',
+            date=>DateTime->now,
+            content=>'',
+        );
+        $self->nodes_by_url->{'index.html'}=$index;
+        $index->children($self->tree);
     }
 }
 
@@ -129,6 +143,7 @@ sub write {
         say "writing $url" unless $self->quiet;
         $node->write($self);
     }
+
 }
 
 
