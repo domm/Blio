@@ -81,6 +81,18 @@ sub _build_tt {
     });
 }
 
+has 'nodes_by_date' => (is=>'ro', isa=>'ArrayRef',lazy_build=>1);
+sub _build_nodes_by_date {
+    my $self = shift;
+
+    my @sorted =
+        map { $_->[0] }
+        sort { $b->[1] <=> $a->[1] }
+        map { [$_ => $_->date->epoch] }
+        values %{$self->nodes_by_url};
+    return \@sorted;
+}
+
 sub run {
     my $self = shift;
 
@@ -123,8 +135,8 @@ sub collect {
 
     unless ($self->nodes_by_url->{'index.html'}) {
         my $index = Blio::Node->new(
-            base_dir => $blio->source_dir,
-            source_file => dir('.'),
+            base_dir => $self->source_dir,
+            source_file => $0,
             id=>'index.html',
             url=>'index.html',
             title=>'Index',
@@ -145,7 +157,6 @@ sub write {
     }
 
 }
-
 
 __PACKAGE__->meta->make_immutable;
 1;
