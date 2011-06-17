@@ -102,6 +102,7 @@ has 'children' => (
 
 );
 has 'parent' => ( is => 'rw', isa => 'Maybe[Blio::Node]', weak_ref => 1);
+has 'stash' => (is=>'ro',isa=>'HashRef',default=>sub {{}});
 
 sub new_from_file {
     my ( $class, $blio, $file ) = @_;
@@ -215,6 +216,14 @@ sub sorted_images {
         sort { $a->[1] cmp $b->[1] }
         map { [$_ => $_->source_file->basename ] } @{$self->images};
     return \@sorted;
+}
+
+sub teaser {
+    my ($self, $length) = @_;
+    $length ||= 200;
+    my $teaser = substr($self->raw_content,0,$length);
+    $teaser =~s/\s\S+$/ .../;
+    return $teaser;
 }
 
 __PACKAGE__->meta->make_immutable;
