@@ -8,6 +8,7 @@ use DateTime::Format::ISO8601;
 use Encode;
 use Markup::Unified;
 use Blio::Image;
+use XML::Atom::SimpleFeed;
 
 class_type 'DateTime';
 coerce 'DateTime' => from 'Int' => via {
@@ -49,6 +50,8 @@ sub _build_date {
 
 has 'language' => (is=>'ro', isa=>'Maybe[Str]');
 has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
+has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
+has 'author' => (is=>'ro',isa=>'Str');
 
 has 'raw_content'      => ( is => 'ro', isa => 'Str' );
 has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
@@ -103,6 +106,7 @@ has 'children' => (
 );
 has 'parent' => ( is => 'rw', isa => 'Maybe[Blio::Node]', weak_ref => 1);
 has 'stash' => (is=>'ro',isa=>'HashRef',default=>sub {{}});
+
 
 sub new_from_file {
     my ( $class, $blio, $file ) = @_;
@@ -181,6 +185,8 @@ sub write {
             }
         }
     }
+
+    $self->write_feed($blio) if $self->feed;
 }
 
 sub relative_root {
@@ -224,6 +230,37 @@ sub teaser {
     my $teaser = substr($self->raw_content,0,$length);
     $teaser =~s/\s\S+$/ .../;
     return $teaser;
+}
+
+sub write_feed {
+    my ($self, $blio) = @_;
+
+    my $site_url = $blio->site_url;
+    die "Cannot generate Atom Feed without site_url, use --site_url to set it" unless $site_url;
+    $site_url .= '/' unless $site_url =~m{/$};
+
+    my $feed = XML::Atom::SimpleFeed->new(
+        title=>decode_utf8($self->title),
+        author=>$blio->site_author || $0,
+        link=>$site_url.$self->url,
+        id=>$site_url.$self->url,
+    );
+    my $children = $self->sorted_children;
+    foreach my $child (@$children) {
+        my %entry = (
+            title=>decode_utf8($child->title),
+            link=>$site_url.$child->url,
+            id=>$child->url,
+            updated=>$child->date->iso8601,
+            summary=>decode_utf8($child->teaser),
+        );
+        $entry{author} = $self->author if $self->author;
+        $feed->add_entry( %entry );
+    }
+    my $feed_file = $blio->output_dir->file($self->id.'.xml');
+    open(my $fh,'>:encoding(UTF-8)',$feed_file->stringify) || die "Cannot write to Atom feed file $feed_file: $!";
+    $feed->print($fh);
+    close $fh;
 }
 
 __PACKAGE__->meta->make_immutable;

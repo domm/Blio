@@ -51,6 +51,8 @@ sub _build_template_dir {
 }
 
 has 'name' => (is=>'ro',isa=>'Str',default=>'Blio',required=>1);
+has 'site_url' => (is=>'ro',isa=>'Str',required=>0);
+has 'site_author' => (is=>'ro',isa=>'Str',required=>0);
 has 'language' => (is=>'ro',isa=>'Str',default=>'en',required=>1);
 has 'converter' => (is=>'ro',isa=>'Maybe[Str]',default=>undef,required=>1);
 
