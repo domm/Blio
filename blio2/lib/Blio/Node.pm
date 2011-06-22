@@ -106,8 +106,11 @@ has 'children' => (
 );
 has 'parent' => ( is => 'rw', isa => 'Maybe[Blio::Node]', weak_ref => 1);
 has 'stash' => (is=>'ro',isa=>'HashRef',default=>sub {{}});
-
-
+has 'feed_url' => (is=>'ro',isa=>'Str',lazy_build=>1);
+sub _build_feed_url {
+    my $self = shift;
+    return $self->id.'.xml';
+}
 sub new_from_file {
     my ( $class, $blio, $file ) = @_;
     my @lines = $file->slurp(
@@ -226,6 +229,7 @@ sub sorted_images {
 
 sub teaser {
     my ($self, $length) = @_;
+    return unless $self->raw_content;
     $length ||= 200;
     my $teaser = substr($self->raw_content,0,$length);
     $teaser =~s/\s\S+$/ .../;
@@ -239,28 +243,34 @@ sub write_feed {
     die "Cannot generate Atom Feed without site_url, use --site_url to set it" unless $site_url;
     $site_url .= '/' unless $site_url =~m{/$};
 
+    my $children = $self->sorted_children;
+    return unless @$children;
     my $feed = XML::Atom::SimpleFeed->new(
-        title=>decode_utf8($self->title),
+        title=>decode_utf8($self->title || 'no title'),
         author=>$blio->site_author || $0,
         link=>$site_url.$self->url,
         id=>$site_url.$self->url,
+        updated=>$children->[0]->date->iso8601,
     );
-    my $children = $self->sorted_children;
     foreach my $child (@$children) {
         my %entry = (
-            title=>decode_utf8($child->title),
+            title=>decode_utf8($child->title || 'no title'),
             link=>$site_url.$child->url,
             id=>$child->url,
             updated=>$child->date->iso8601,
-            summary=>decode_utf8($child->teaser),
+            category=>$child->parent->id,
+            summary=>decode_utf8($child->teaser || ' '),
         );
         $entry{author} = $self->author if $self->author;
         $feed->add_entry( %entry );
     }
-    my $feed_file = $blio->output_dir->file($self->id.'.xml');
+    my $feed_file = $blio->output_dir->file($self->feed_url);
     open(my $fh,'>:encoding(UTF-8)',$feed_file->stringify) || die "Cannot write to Atom feed file $feed_file: $!";
     $feed->print($fh);
     close $fh;
+    
+    my $utime = $children->[0]->date->epoch;
+    utime($utime,$utime,$feed_file->stringify);
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -83,7 +83,7 @@ sub _build_tt {
     });
 }
 
-has 'nodes_by_date' => (is=>'ro', isa=>'ArrayRef',lazy_build=>1);
+has 'nodes_by_date' => (is=>'ro', isa=>'ArrayRef',lazy_build=>1,traits  => [ 'NoGetopt' ]);
 sub _build_nodes_by_date {
     my $self = shift;
 
@@ -94,6 +94,7 @@ sub _build_nodes_by_date {
         values %{$self->nodes_by_url};
     return \@sorted;
 }
+has 'stash' => (is=>'ro',isa=>'HashRef',default=>sub {{}},traits  => [ 'NoGetopt' ]);
 
 sub run {
     my $self = shift;
