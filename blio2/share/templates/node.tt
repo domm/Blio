@@ -1,0 +1,27 @@
+<h2>[% node.title %]</h2>
+
+[% node.content %]
+
+[% IF node.has_images %]
+<ul>
+[% FOREACH image IN node.sorted_images %]
+<li>
+<a href="[% base %][% image.target_file %]"><img src="[% base %][% image.thumbnail %]" border="0"></a>
+</li>
+[% END %]
+</ul>
+[% END %]
+
+[% IF node.has_children %]
+<ul>
+[% FOREACH child IN node.sorted_children %]
+  <li><a href="[% base %][% child.url %]">[% child.title %]</a></li>
+[% END %]
+</ul>
+[% END %]
+
+[% FOREACH top_node IN blio.tree %]
+<a href="[% base %][% top_node.url %]">[% top_node.title %]</a>
+[% ' | ' UNLESS loop.last %]
+[% END %]
+
