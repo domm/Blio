@@ -1,7 +1,0 @@
----
-basedir: /home/domm/perl/Blio/example
-cats:
-  blog: The Blog
-  root: Root Cat
-ignore:
-  - \.svn

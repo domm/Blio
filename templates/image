@@ -1,8 +1,0 @@
-<h2>[% node.title %]</h2>
-
-<p>[% node.date %]</p>
-
-<img src="[% node.image %]">
-
-
-

@@ -1,8 +1,0 @@
-<h2>[% cat %]</h2>
-
-<ul>
-[% FOREACH node IN nodes %]
-<li><a href="[% node.relurl %]">[% node.title %]</a>
-[% END %]
-</ul>
-
