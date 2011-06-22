@@ -15,7 +15,6 @@ my $builder = Module::Build->new(
         'Template'=>0,
         'File::ShareDir'=>'1.03',
         'Digest::SHA1'=>'2.13',,
-        'File::Copy'=>'2.14',
         'Imager'=>'0.83',
         'DateTime::Format::ISO8601'=>'0.07',
         'Markup::Unified'=>'0.03',
