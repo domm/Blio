@@ -29,6 +29,7 @@ my $builder = Module::Build->new(
     create_makefile     => 'passthrough',
     create_readme       => 1,
     share_dir=>'share',
+    recursive_test_files=>1,
 );
 
 $builder->create_build_script();

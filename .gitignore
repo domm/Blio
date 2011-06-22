@@ -1,1 +1,5 @@
-cover_db
+Build
+MYMETA.yml
+_build/
+blib/
+cover_db/
