@@ -150,8 +150,10 @@ sub parse {
     my ( $class, @lines ) = @_;
     my %header;
     while ( my $line = shift(@lines) ) {
-        last if $line =~ /\^s+$/;
+        last if $line =~ /^\s+$/;
         last unless $line =~ /:/;
+        chomp($line);
+        $line=~s/\s+$//;
         my ( $key, $value ) = split( /\s*:\s*/, $line, 2 );
         $header{ lc($key) } = encode_utf8($value);
     }
