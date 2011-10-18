@@ -175,7 +175,8 @@ sub write {
             blio=>$blio,
             base=>$self->relative_root,
         },
-        ,$outfile->relative($blio->output_dir)->stringify
+        ,$outfile->relative($blio->output_dir)->stringify,
+        binmode => ':utf8',
     ) || die $tt->error;
 
     my $utime = $self->date->epoch;
