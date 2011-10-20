@@ -53,7 +53,7 @@ has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
 has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
 
-has 'raw_content'      => ( is => 'ro', isa => 'Str' );
+has 'raw_content'      => ( is => 'rw', isa => 'Str' );
 has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
 sub _build_content {
     my $self = shift;
