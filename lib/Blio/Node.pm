@@ -126,6 +126,7 @@ sub new_from_file {
         source_file => $file,
         %$header,
         raw_content => encode_utf8($raw_content),
+        stash=>$header,
     );
 
     # check and add images
