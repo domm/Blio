@@ -53,7 +53,7 @@ has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
 has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
 
-has 'raw_content'      => ( is => 'ro', isa => 'Str' );
+has 'raw_content'      => ( is => 'rw', isa => 'Str' );
 has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
 sub _build_content {
     my $self = shift;
@@ -126,6 +126,7 @@ sub new_from_file {
         source_file => $file,
         %$header,
         raw_content => encode_utf8($raw_content),
+        stash=>$header,
     );
 
     # check and add images
@@ -150,8 +151,10 @@ sub parse {
     my ( $class, @lines ) = @_;
     my %header;
     while ( my $line = shift(@lines) ) {
-        last if $line =~ /\^s+$/;
+        last if $line =~ /^\s+$/;
         last unless $line =~ /:/;
+        chomp($line);
+        $line=~s/\s+$//;
         my ( $key, $value ) = split( /\s*:\s*/, $line, 2 );
         $header{ lc($key) } = encode_utf8($value);
     }
@@ -173,7 +176,8 @@ sub write {
             blio=>$blio,
             base=>$self->relative_root,
         },
-        ,$outfile->relative($blio->output_dir)->stringify
+        ,$outfile->relative($blio->output_dir)->stringify,
+        binmode => ':utf8',
     ) || die $tt->error;
 
     my $utime = $self->date->epoch;
