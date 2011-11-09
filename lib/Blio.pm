@@ -79,7 +79,7 @@ sub _build_tt {
         OUTPUT_PATH=>$self->output_dir->stringify,
         INCLUDE_PATH=>[$self->template_dir->stringify, dir(dist_dir('Blio'),'templates')->stringify],
         WRAPPER=>'wrapper.tt',
-        ENCODING     => 'utf-8',
+        ENCODING     => 'UTF8',
     });
 }
 

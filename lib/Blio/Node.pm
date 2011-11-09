@@ -124,10 +124,9 @@ sub new_from_file {
         converter   => $blio->converter,
         source_file => $file,
         %$header,
-        raw_content => encode_utf8($raw_content),
+        raw_content => $raw_content,
         stash=>$header,
     );
-
     # check and add images
     my $img_dir = $file->basename;
     $img_dir=~s/\.txt$//;
@@ -165,7 +164,6 @@ sub write {
     my ($self, $blio) = @_;
 
     my $tt = $blio->tt;
-    
     my $outfile = $blio->output_dir->file($self->url);
     $outfile->parent->mkpath unless (-d $outfile->parent);
 
