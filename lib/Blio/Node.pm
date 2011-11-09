@@ -117,7 +117,6 @@ sub new_from_file {
         chomp  => 1,
         iomode => '<:encoding(UTF-8)',
     );
-    #warn $file;
     my ( $header, $raw_content ) = $class->parse(@lines);
     my $node = $class->new(
         base_dir    => $blio->source_dir,
@@ -177,7 +176,7 @@ sub write {
             base=>$self->relative_root,
         },
         ,$outfile->relative($blio->output_dir)->stringify,
-       # binmode => ':utf8',
+        binmode => ':utf8',
     ) || die $tt->error;
 
     my $utime = $self->date->epoch;
