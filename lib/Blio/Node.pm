@@ -60,7 +60,7 @@ sub _build_content {
     my $converter = $self->converter;
     my $raw_content = $self->raw_content;
     return $raw_content unless $converter;
-    
+
     given ($converter) {
         when ('html') { return $raw_content }
         when ([qw(textile markdown bbcode)]) {
@@ -154,7 +154,7 @@ sub parse {
         chomp($line);
         $line=~s/\s+$//;
         my ( $key, $value ) = split( /\s*:\s*/, $line, 2 );
-        $header{ lc($key) } = encode_utf8($value);
+        $header{ lc($key) } = $value;
     }
     my $content = join( "\n", @lines );
     return \%header, $content;
@@ -254,6 +254,7 @@ sub write_feed {
         updated=>$children->[0]->date->iso8601,
     );
     foreach my $child (@$children) {
+        next unless $child->parent;
         my %entry = (
             title=>decode_utf8($child->title || 'no title'),
             link=>$site_url.$child->url,
@@ -269,7 +270,7 @@ sub write_feed {
     open(my $fh,'>:encoding(UTF-8)',$feed_file->stringify) || die "Cannot write to Atom feed file $feed_file: $!";
     $feed->print($fh);
     close $fh;
-    
+
     my $utime = $children->[0]->date->epoch;
     utime($utime,$utime,$feed_file->stringify);
 }
