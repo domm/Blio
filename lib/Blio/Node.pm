@@ -141,6 +141,16 @@ sub new_from_file {
             $node->add_image($img);
         }
     }
+    my $single_image = $file->basename;
+    $single_image =~ s/\.txt$/.jpg/;
+    my $single_image_file = $file->parent->file($single_image);
+    if (-e $single_image_file) {
+        my $img = Blio::Image->new(
+            base_dir    => $blio->source_dir,
+            source_file => $single_image_file,
+        );
+        $node->add_image($img);
+    }
 
     return $node;
 }
