@@ -60,7 +60,7 @@ sub _build_content {
     my $converter = $self->converter;
     my $raw_content = $self->raw_content;
     return $raw_content unless $converter;
-    
+
     given ($converter) {
         when ('html') { return $raw_content }
         when ([qw(textile markdown bbcode)]) {
@@ -117,7 +117,6 @@ sub new_from_file {
         chomp  => 1,
         iomode => '<:encoding(UTF-8)',
     );
-    #warn $file;
     my ( $header, $raw_content ) = $class->parse(@lines);
     my $node = $class->new(
         base_dir    => $blio->source_dir,
@@ -125,10 +124,9 @@ sub new_from_file {
         converter   => $blio->converter,
         source_file => $file,
         %$header,
-        raw_content => encode_utf8($raw_content),
+        raw_content => $raw_content,
         stash=>$header,
     );
-
     # check and add images
     my $img_dir = $file->basename;
     $img_dir=~s/\.txt$//;
@@ -143,6 +141,16 @@ sub new_from_file {
             $node->add_image($img);
         }
     }
+    my $single_image = $file->basename;
+    $single_image =~ s/\.txt$/.jpg/;
+    my $single_image_file = $file->parent->file($single_image);
+    if (-e $single_image_file) {
+        my $img = Blio::Image->new(
+            base_dir    => $blio->source_dir,
+            source_file => $single_image_file,
+        );
+        $node->add_image($img);
+    }
 
     return $node;
 }
@@ -156,7 +164,7 @@ sub parse {
         chomp($line);
         $line=~s/\s+$//;
         my ( $key, $value ) = split( /\s*:\s*/, $line, 2 );
-        $header{ lc($key) } = encode_utf8($value);
+        $header{ lc($key) } = $value;
     }
     my $content = join( "\n", @lines );
     return \%header, $content;
@@ -166,7 +174,6 @@ sub write {
     my ($self, $blio) = @_;
 
     my $tt = $blio->tt;
-    
     my $outfile = $blio->output_dir->file($self->url);
     $outfile->parent->mkpath unless (-d $outfile->parent);
 
@@ -257,6 +264,7 @@ sub write_feed {
         updated=>$children->[0]->date->iso8601,
     );
     foreach my $child (@$children) {
+        next unless $child->parent;
         my %entry = (
             title=>decode_utf8($child->title || 'no title'),
             link=>$site_url.$child->url,
@@ -272,7 +280,7 @@ sub write_feed {
     open(my $fh,'>:encoding(UTF-8)',$feed_file->stringify) || die "Cannot write to Atom feed file $feed_file: $!";
     $feed->print($fh);
     close $fh;
-    
+
     my $utime = $children->[0]->date->epoch;
     utime($utime,$utime,$feed_file->stringify);
 }

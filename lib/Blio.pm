@@ -55,6 +55,7 @@ has 'site_url' => (is=>'ro',isa=>'Str',required=>0);
 has 'site_author' => (is=>'ro',isa=>'Str',required=>0);
 has 'language' => (is=>'ro',isa=>'Str',default=>'en',required=>1);
 has 'converter' => (is=>'ro',isa=>'Maybe[Str]',default=>undef,required=>1);
+has 'thumbnail' => (is=>'ro',isa=>'Int',default=>300,required=>1);
 
 has 'force' => (is=>'ro',isa=>'Bool',default=>0);
 has 'quiet' => (is=>'ro',isa=>'Bool',default=>0);
@@ -79,7 +80,7 @@ sub _build_tt {
         OUTPUT_PATH=>$self->output_dir->stringify,
         INCLUDE_PATH=>[$self->template_dir->stringify, dir(dist_dir('Blio'),'templates')->stringify],
         WRAPPER=>'wrapper.tt',
-        ENCODING     => 'utf-8',
+        ENCODING     => 'UTF8',
     });
 }
 
