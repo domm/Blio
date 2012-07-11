@@ -15,6 +15,7 @@ use Blio::Node;
 with 'MooseX::Getopt';
 with 'MooseX::SimpleConfig';
 
+has '+configfile' => ( default => 'blio.ini' );
 has 'source_dir' => (
     is         => 'ro',
     isa        => 'Path::Class::Dir',
