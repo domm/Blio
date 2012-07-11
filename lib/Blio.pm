@@ -13,6 +13,7 @@ use File::ShareDir qw(dist_dir);
 use Blio::Node;
 
 with 'MooseX::Getopt';
+with 'MooseX::SimpleConfig';
 
 has 'source_dir' => (
     is         => 'ro',
