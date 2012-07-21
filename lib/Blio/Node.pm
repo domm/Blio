@@ -111,6 +111,7 @@ sub _build_feed_url {
     my $self = shift;
     return $self->id.'.xml';
 }
+
 sub new_from_file {
     my ( $class, $blio, $file ) = @_;
     my @lines = $file->slurp(
@@ -118,6 +119,7 @@ sub new_from_file {
         iomode => '<:encoding(UTF-8)',
     );
     my ( $header, $raw_content ) = $class->parse(@lines);
+    my $tags = delete $header->{tags};
     my $node = $class->new(
         base_dir    => $blio->source_dir,
         language    => $blio->language,
@@ -127,7 +129,22 @@ sub new_from_file {
         raw_content => $raw_content,
         stash=>$header,
     );
-    # check and add images
+
+    $node->register_tags($blio, $tags) if $tags && $blio->tags;
+
+    # check and add single image
+    my $single_image = $file->basename;
+    $single_image =~ s/\.txt$/.jpg/;
+    my $single_image_file = $file->parent->file($single_image);
+    if (-e $single_image_file) {
+        my $img = Blio::Image->new(
+            base_dir    => $blio->source_dir,
+            source_file => $single_image_file,
+        );
+        $node->add_image($img);
+    }
+
+    # check and add images dir
     my $img_dir = $file->basename;
     $img_dir=~s/\.txt$//;
     $img_dir = $file->parent->subdir($img_dir.'_images');
@@ -140,16 +157,6 @@ sub new_from_file {
             );
             $node->add_image($img);
         }
-    }
-    my $single_image = $file->basename;
-    $single_image =~ s/\.txt$/.jpg/;
-    my $single_image_file = $file->parent->file($single_image);
-    if (-e $single_image_file) {
-        my $img = Blio::Image->new(
-            base_dir    => $blio->source_dir,
-            source_file => $single_image_file,
-        );
-        $node->add_image($img);
     }
 
     return $node;
@@ -283,6 +290,35 @@ sub write_feed {
 
     my $utime = $children->[0]->date->epoch;
     utime($utime,$utime,$feed_file->stringify);
+}
+
+sub register_tags {
+    my ($self, $blio, $tags ) = @_;
+    my @tags = split(/\s*,\s*/,$tags);
+    my $tagindex = $blio->tagindex;
+    my @tagnodes;
+    foreach my $tag (@tags) {
+        my $tagid = $tag;
+        $tagid=~s/\s/_/g;
+        my $tagnode = $blio->nodes_by_url->{"tags/$tagid.html"};
+        unless ($tagnode) {
+            $tagnode = Blio::Node->new(
+                base_dir => $blio->source_dir,
+                source_file => $0,
+                id=>$tagid.'.html',
+                url=>"tags/$tagid.html",
+                title=>$tag,
+                date=>DateTime->now,
+                content=>'',
+            );
+            $blio->nodes_by_url->{$tagnode->url} = $tagnode;
+            $tagnode->parent($tagindex);
+            $tagindex->add_child($tagnode);
+        }
+        $tagnode->add_child($self);
+        push(@tagnodes,$tagnode);
+    }
+    $self->tags(\@tagnodes) if @tagnodes;
 }
 
 __PACKAGE__->meta->make_immutable;
