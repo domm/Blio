@@ -82,7 +82,7 @@ has 'tags'             => (
     is      => 'rw',
     isa     => 'ArrayRef',
     default => sub { [] },
-    traits  => ['Array']
+    traits  => ['Array'],
     handles => {
         has_tags => 'count',
     },
