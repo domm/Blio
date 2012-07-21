@@ -36,7 +36,7 @@ sub _build_url {
 has 'template' => (is=>'rw',isa=>'Str',required=>1,default=>'node.tt');
 has 'title' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'date' => (
-    is         => 'ro',
+    is         => 'rw',
     isa        => 'DateTime',
     required   => 1,
     lazy_build => 1,
@@ -308,12 +308,15 @@ sub register_tags {
                 id=>$tagid.'.html',
                 url=>"tags/$tagid.html",
                 title=>$tag,
-                date=>DateTime->now,
+                date=>DateTime->new(year=>1980),
                 content=>'',
             );
             $blio->nodes_by_url->{$tagnode->url} = $tagnode;
             $tagnode->parent($tagindex);
             $tagindex->add_child($tagnode);
+            if ($self->date > $tagnode->date) {
+                $tagnode->date($self->date);
+            }
         }
         $tagnode->add_child($self);
         push(@tagnodes,$tagnode);

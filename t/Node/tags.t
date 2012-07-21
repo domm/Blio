@@ -26,6 +26,7 @@ my $base = $blio->source_dir;
     my $tag_london = $blio->nodes_by_url->{'tags/london.html'};
     is($tag_london->has_children,1,'1 node linked with tag "london"');
     is($tag_london->children->[0]->url,$node->url,'correct node linked');
+    is($tag_london->date->iso8601,'2008-10-12T00:00:00','tag date = node date');
 }
 
 {
@@ -38,9 +39,11 @@ my $base = $blio->source_dir;
     my $tag_fairy = $blio->nodes_by_url->{'tags/fairy.html'};
     is($tag_fairy->has_children,1,'1 node linked with tag "fairy"');
     is($tag_fairy->children->[0]->url,$node->url,'correct node linked');
+    is($tag_fairy->date->iso8601,'2004-11-01T00:00:00','tag date = node date');
 }
 
 my $tag_fantasy = $blio->nodes_by_url->{'tags/fantasy.html'};
 is($tag_fantasy->has_children,2,'2 nodes linked with tag "fantasy"');
+is($tag_fantasy->date->iso8601,'2008-10-12T00:00:00','tag date = newest node date');
 
 done_testing();
