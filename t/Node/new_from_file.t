@@ -22,7 +22,7 @@ my $base = $blio->source_dir;
     is($node->source_file->relative($base),'blog.txt','source_file');
     is($node->url,'blog.html','url');
 
-    is($node->title,encode_utf8('A Blög'),'title');
+    is($node->title,'A Blög','title');
     is($node->date,'2011-06-13T11:54:40','date from mtime');
     is($node->parent,undef,'no parent');
 }
