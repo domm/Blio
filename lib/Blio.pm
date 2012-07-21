@@ -59,6 +59,7 @@ has 'language' => (is=>'ro',isa=>'Str',default=>'en',required=>1);
 has 'converter' => (is=>'ro',isa=>'Maybe[Str]',default=>undef,required=>1);
 has 'thumbnail' => (is=>'ro',isa=>'Int',default=>300,required=>1);
 
+has 'tags' => (is=>'ro',isa=>'Bool',default=>0);
 has 'force' => (is=>'ro',isa=>'Bool',default=>0);
 has 'quiet' => (is=>'ro',isa=>'Bool',default=>0);
 
@@ -98,6 +99,26 @@ sub _build_nodes_by_date {
     return \@sorted;
 }
 has 'stash' => (is=>'ro',isa=>'HashRef',default=>sub {{}},traits  => [ 'NoGetopt' ]);
+
+has 'tagindex' => (
+    is=>'rw',
+    isa=>'Blio::Node',
+    lazy_build=>1,
+);
+sub _build_tagindex {
+    my $self = shift;
+    my $tagindex = Blio::Node->new(
+        base_dir => $self->source_dir,
+        source_file => $0,
+        id=>'tags.html',
+        url=>'tags.html',
+        title=>'Tags',
+        date=>DateTime->now,
+        content=>'',
+    );
+    $self->nodes_by_url->{'tags.html'}=$tagindex;
+    return $tagindex;
+}
 
 sub run {
     my $self = shift;
