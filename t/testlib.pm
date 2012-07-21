@@ -14,6 +14,7 @@ sub blio {
         output_dir=>testdir(),
         source_dir=>Path::Class::dir(qw(. t testdata ),$site),
         template_dir=>Path::Class::dir(qw(. share templates)),
+        @_
     );
 }
 
