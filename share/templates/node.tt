@@ -20,6 +20,14 @@
 </ul>
 [% END %]
 
+[% IF node.has_tags %]
+<ul>
+[% FOREACH tag IN node.tags %]
+<li><a href="[% base %][% tag.url %]">[% tag.title %]</a></li>
+[% END %]
+</ul>
+[% END %]
+
 [% FOREACH top_node IN blio.tree %]
 <a href="[% base %][% top_node.url %]">[% top_node.title %]</a>
 [% ' | ' UNLESS loop.last %]
