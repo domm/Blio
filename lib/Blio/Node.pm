@@ -314,11 +314,11 @@ sub register_tags {
             $blio->nodes_by_url->{$tagnode->url} = $tagnode;
             $tagnode->parent($tagindex);
             $tagindex->add_child($tagnode);
-            if ($self->date > $tagnode->date) {
-                $tagnode->date($self->date);
-            }
         }
         $tagnode->add_child($self);
+        if ($self->date > $tagnode->date) {
+            $tagnode->date($self->date);
+        }
         push(@tagnodes,$tagnode);
     }
     $self->tags(\@tagnodes) if @tagnodes;
