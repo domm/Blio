@@ -232,11 +232,14 @@ sub possible_parent_url {
 }
 
 sub sorted_children {
-    my $self = shift;
-    my @sorted = 
+    my ($self, $limit) = @_;
+    my @sorted =
         map { $_->[0] }
         sort { $b->[1] <=> $a->[1] }
         map { [$_ => $_->date->epoch] } @{$self->children};
+    if ($limit && $limit < @sorted) {
+        @sorted = splice(@sorted,0,$limit);
+    }
     return \@sorted;
 }
 
@@ -265,7 +268,8 @@ sub write_feed {
     die "Cannot generate Atom Feed without site_url, use --site_url to set it" unless $site_url;
     $site_url .= '/' unless $site_url =~m{/$};
 
-    my $children = $self->sorted_children;
+    my $children = $self->sorted_children(5);
+
     return unless @$children;
     my $feed = XML::Atom::SimpleFeed->new(
         title=>decode_utf8($self->title || 'no title'),
@@ -274,6 +278,7 @@ sub write_feed {
         id=>$site_url.$self->url,
         updated=>$children->[0]->date->iso8601,
     );
+
     foreach my $child (@$children) {
         next unless $child->parent;
         my %entry = (
