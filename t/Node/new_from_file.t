@@ -34,7 +34,7 @@ my $base = $blio->source_dir;
     is($node->url,'books.html','url');
     
     is($node->title,'Books','title');
-    is($node->date,'2010-01-01T00:00:00','date from header');
+    is($node->date,'2001-01-01T00:00:00','date from header');
     is($node->date->time_zone->name,'floating','floating time zone');
     is($node->language,'en','language: en');
     is($node->converter,undef,'converter: undef');
