@@ -199,6 +199,11 @@ sub write {
     ) || die $tt->error;
 
     my $utime = $self->date->epoch;
+    if ($self->has_children) {
+        my $children = $self->sorted_children;
+        my $child_utime = $children->[0]->date->epoch;
+        $utime = $child_utime if $child_utime > $utime;
+    }
     utime($utime,$utime,$outfile->stringify);
 
     if ($self->has_images) {
