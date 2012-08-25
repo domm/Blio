@@ -9,6 +9,7 @@ use Encode;
 use Markup::Unified;
 use Blio::Image;
 use XML::Atom::SimpleFeed;
+use DateTime::Format::RFC3339;
 
 class_type 'DateTime';
 coerce 'DateTime' => from 'Int' => via {
@@ -276,12 +277,17 @@ sub write_feed {
     my $children = $self->sorted_children(5);
 
     return unless @$children;
+    my $rfc3339 = DateTime::Format::RFC3339->new();
+
     my $feed = XML::Atom::SimpleFeed->new(
         title=>decode_utf8($self->title || 'no title'),
         author=>$blio->site_author || $0,
-        link=>$site_url.$self->url,
+        link=>{
+            href=>$site_url.$self->url,
+            rel=>'self',
+        },
         id=>$site_url.$self->url,
-        updated=>$children->[0]->date->iso8601,
+        updated=>$rfc3339->format_datetime($children->[0]->date),
     );
 
     foreach my $child (@$children) {
@@ -289,10 +295,11 @@ sub write_feed {
         my %entry = (
             title=>decode_utf8($child->title || 'no title'),
             link=>$site_url.$child->url,
-            id=>$child->url,
-            updated=>$child->date->iso8601,
+            id=>$site_url.$child->url,
+            updated=>$rfc3339->format_datetime($child->date),
             category=>$child->parent->id,
             summary=>decode_utf8($child->teaser || ' '),
+            content=>decode_utf8($child->content),
         );
         $entry{author} = $self->author if $self->author;
         $feed->add_entry( %entry );
