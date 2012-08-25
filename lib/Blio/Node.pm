@@ -283,7 +283,7 @@ sub write_feed {
         title=>decode_utf8($self->title || 'no title'),
         author=>$blio->site_author || $0,
         link=>{
-            href=>$site_url.$self->url,
+            href=>$site_url.$self->feed_url,
             rel=>'self',
         },
         id=>$site_url.$self->url,
