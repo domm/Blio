@@ -286,7 +286,7 @@ sub write_feed {
             href=>$site_url.$self->feed_url,
             rel=>'self',
         },
-        id=>$site_url.$self->url,
+        id=>$site_url.$self->feed_url,
         updated=>$rfc3339->format_datetime($children->[0]->date),
     );
 
