@@ -292,7 +292,7 @@ sub write_feed {
 
     foreach my $child (@$children) {
         next unless $child->parent;
-        my %entry = (
+        my @entry = (
             title=>decode_utf8($child->title || 'no title'),
             link=>$site_url.$child->url,
             id=>$site_url.$child->url,
@@ -301,8 +301,13 @@ sub write_feed {
             summary=>decode_utf8($child->teaser || ' '),
             content=>decode_utf8($child->content),
         );
-        $entry{author} = $self->author if $self->author;
-        $feed->add_entry( %entry );
+        push (@entry,author => $self->author) if $self->author;
+        if ($child->has_tags) {
+            foreach my $tag (@{$child->tags}) {
+                push (@entry, category => $tag->title);
+            }
+        }
+        $feed->add_entry( @entry );
     }
     my $feed_file = $blio->output_dir->file($self->feed_url);
     open(my $fh,'>:encoding(UTF-8)',$feed_file->stringify) || die "Cannot write to Atom feed file $feed_file: $!";
