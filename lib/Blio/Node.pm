@@ -62,6 +62,11 @@ sub _build_content {
     my $raw_content = $self->raw_content;
     return $raw_content unless $converter;
 
+    if ($self->inline_images) {
+        $raw_content=~s/<bliothumb:(.*?)>/$self->image_by_name($1,'thumbnail')/ge;
+        $raw_content=~s/<blioimg:(.*?)>/$self->image_by_name($1,'url')/ge;
+    }
+
     given ($converter) {
         when ('html') { return $raw_content }
         when ([qw(textile markdown bbcode)]) {
@@ -98,6 +103,7 @@ has 'images' => (
         add_image    => 'push',
     },
     );
+has 'inline_images' => (is=>'ro',isa=>'Bool',default=>0);
 has 'children' => (
     is      => 'rw',
     isa     => 'ArrayRef[Blio::Node]',
@@ -348,6 +354,17 @@ sub register_tags {
         push(@tagnodes,$tagnode);
     }
     $self->tags(\@tagnodes) if @tagnodes;
+}
+
+sub image_by_name {
+    my ($self, $name, $method) = @_;
+    $method ||= 'url';
+
+    my @found = grep { $name eq $_->source_file->basename } @{$self->images};
+    if (@found == 1) {
+        return $self->relative_root.$found[0]->$method;
+    }
+    return "cannot_resolve_image_".$name."_found_".scalar @found;
 }
 
 __PACKAGE__->meta->make_immutable;

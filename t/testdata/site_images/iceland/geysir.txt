@@ -1,3 +1,12 @@
 title: Geysir
+inline_images: 1
+converter: textile
 
 more water
+
+"!<bliothumb:geysir_1.jpg>(what a nice geysir)!":<blioimg:geysir_1.jpg>
+
+with inline images!
+
+"!<bliothumb:geysir_2.jpg>(what a nice geysir)!":<blioimg:geysir_2.jpg>
+
