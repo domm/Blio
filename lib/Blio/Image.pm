@@ -35,14 +35,14 @@ sub publish {
 }
 
 sub make_thumbnail {
-    my ($self, $blio) = @_;
+    my ($self, $blio, $width) = @_;
 
     $blio->output_dir->file($self->url)->parent->mkpath;
     my $file = $self->source_file->stringify;
     my $target = $blio->output_dir->file($self->thumbnail)->stringify;
     my $image = Imager->new;
     $image->read(file=>$file) || die "Cannot read image $file: ".$image->errstr;
-    my $width = $blio->thumbnail;
+    $width ||= $blio->thumbnail;
     my $thumbnail = $image->scale(xpixels => $width) || die "Cannot scale $file: ".$image->errstr;
     $thumbnail->write( file => $target ) || die "Cannot write thumbnail $target" . $thumbnail->errstr;
 }

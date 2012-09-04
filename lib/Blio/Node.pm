@@ -104,6 +104,8 @@ has 'images' => (
     },
     );
 has 'inline_images' => (is=>'ro',isa=>'Bool',default=>0);
+has 'thumbnail' => (is=>'ro',isa=>'Int');
+
 has 'children' => (
     is      => 'rw',
     isa     => 'ArrayRef[Blio::Node]',
@@ -218,7 +220,7 @@ sub write {
             if ($blio->force || !-e $blio->output_dir->file($img->thumbnail)) {
                 say "\timage ".$img->url unless $blio->quiet;
                 $img->publish($blio);
-                $img->make_thumbnail($blio);
+                $img->make_thumbnail($blio, $self->thumbnail);
             }
         }
     }

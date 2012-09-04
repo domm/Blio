@@ -1,6 +1,7 @@
 title: Geysir
 inline_images: 1
 converter: textile
+thumbnail: 400
 
 more water
 
