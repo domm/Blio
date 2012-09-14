@@ -273,7 +273,11 @@ sub teaser {
     my ($self, $length) = @_;
     return unless $self->raw_content;
     $length ||= 200;
-    my $teaser = substr($self->raw_content,0,$length);
+    my $teaser = $self->content;
+    $teaser =~ s/<a href(.*?)>//g;
+    $teaser =~ s{</a>}{}g;
+    $teaser =~ s{<img(.*?)>}//g;
+    $teaser = substr($teaser,0,$length);
     $teaser =~s/\s\S+$/ .../;
     return $teaser;
 }
