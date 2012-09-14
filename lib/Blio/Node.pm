@@ -65,6 +65,9 @@ sub _build_content {
     if ($self->inline_images) {
         $raw_content=~s/<bliothumb:(.*?)>/$self->image_by_name($1,'thumbnail')/ge;
         $raw_content=~s/<blioimg:(.*?)>/$self->image_by_name($1,'url')/ge;
+
+        $raw_content=~s/<bliothumb#(\d+)>/$self->image_by_index($1,'thumbnail')/ge;
+        $raw_content=~s/<blioimg#(\d+)>/$self->image_by_index($1,'url')/ge;
     }
 
     given ($converter) {
@@ -367,6 +370,15 @@ sub image_by_name {
         return $self->relative_root.$found[0]->$method;
     }
     return "cannot_resolve_image_".$name."_found_".scalar @found;
+}
+
+sub image_by_index {
+    my ($self, $index, $method) = @_;
+    $method ||= 'url';
+
+    my $img = $self->images->[$index - 1];
+    return $self->relative_root.$img->$method if $img;
+    return "cannot_resolve_image_index_".$index;
 }
 
 __PACKAGE__->meta->make_immutable;
