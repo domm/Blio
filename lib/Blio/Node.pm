@@ -341,6 +341,7 @@ sub register_tags {
     foreach my $tag (@tags) {
         my $tagid = $tag;
         $tagid=~s/\s/_/g;
+        $tagid=~s/\W/_/g;
         my $tagnode = $blio->nodes_by_url->{"tags/$tagid.html"};
         unless ($tagnode) {
             $tagnode = Blio::Node->new(
