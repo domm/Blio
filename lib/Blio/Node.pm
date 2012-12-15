@@ -273,12 +273,23 @@ sub teaser {
     my ($self, $length) = @_;
     return unless $self->raw_content;
     $length ||= 200;
-    my $teaser = $self->content;
-    $teaser =~ s/<a href(.*?)>//g;
-    $teaser =~ s{</a>}{}g;
-    $teaser =~ s{<img(.*?)>}//g;
-    $teaser = substr($teaser,0,$length);
-    $teaser =~s/\s\S+$/ .../;
+
+    my $teaser;
+    if ($length =~ /^\d+$/) {
+        $teaser = $self->content;
+        $teaser =~ s/<a href(.*?)>//g;
+        $teaser =~ s{</a>}{}g;
+        $teaser =~ s{<img(.*?)>}//g;
+        $teaser = substr($teaser,0,$length);
+        $teaser =~s/\s\S+$/ .../;
+    }
+    else {
+        my $rest;
+        ($teaser, $rest) = split($length, $self->content, 2);
+        unless ($rest) {
+            $teaser = $self->teaser(200);
+        }
+    }
     return $teaser;
 }
 
