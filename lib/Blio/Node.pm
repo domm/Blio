@@ -150,7 +150,7 @@ sub new_from_file {
 
     # check and add single image
     my $single_image = $file->basename;
-    $single_image =~ s/\.txt$/.jpg/;
+    $single_image =~ s/\.txt$/.jpg/i;
     my $single_image_file = $file->parent->file($single_image);
     if (-e $single_image_file) {
         my $img = Blio::Image->new(
@@ -166,7 +166,7 @@ sub new_from_file {
     $img_dir = $file->parent->subdir($img_dir.'_images');
     if (-d $img_dir) {
         while (my $image_file = $img_dir->next) {
-            next unless $image_file =~ /\.jpe?g$/;
+            next unless $image_file =~ /\.jpe?g$/i;
             my $img = Blio::Image->new(
                 base_dir    => $blio->source_dir,
                 source_file => $image_file,
