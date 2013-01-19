@@ -180,7 +180,12 @@ sub write {
     
     while (my ($url, $node) = each %{$self->nodes_by_url}) {
         say "writing $url" unless $self->quiet;
-        $node->write($self);
+        if ($node->paged_list) {
+            $node->write_paged_list($self);
+        }
+        else {
+            $node->write($self);
+        }
     }
 
 }

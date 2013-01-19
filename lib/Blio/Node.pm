@@ -53,6 +53,7 @@ has 'language' => (is=>'ro', isa=>'Maybe[Str]');
 has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
 has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
+has 'paged_list' => (is=>'ro',isa=>'Int',default=>0);
 
 has 'raw_content'      => ( is => 'rw', isa => 'Str' );
 has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
@@ -231,6 +232,47 @@ sub write {
     $self->write_feed($blio) if $self->feed;
 }
 
+sub write_paged_list {
+    my ($self, $blio) = @_;
+
+    my $tt = $blio->tt;
+    my $list = $self->sorted_children;
+    my $items_per_page = $self->paged_list;
+    my $current_page = 1;
+    my $outfile = $blio->output_dir->file($self->url);
+    my $utime=0;
+    my @page;
+    foreach my $i (0 .. $#{$list}) {
+        say $list->[$i];
+        if ($i>0 && $i % $items_per_page == 0) {
+            # write this page
+            $tt->process($self->template,
+                {
+                    node=>$self,
+                    page=>\@page,
+                    blio=>$blio,
+                    base=>$self->relative_root,
+                },
+                ,$outfile->relative($blio->output_dir)->stringify,
+                binmode => ':utf8',
+            ) || die $tt->error;
+
+            # start new page
+            my $utime=0;
+            @page=();
+            $current_page++;
+            $outfile = $blio->output_dir->file($self->id."_".$current_page.'.html');
+            utime($utime,$utime,$outfile->stringify);
+        }
+
+        push(@page, $list->[$i]);
+        my $this_utime = $list->[$i]->date->epoch;
+        $utime = $this_utime if $this_utime > $utime;
+    }
+
+    $self->write_feed($blio) if $self->feed;
+}
+
 sub relative_root {
     my $self = shift;
     my $url = $self->url;
@@ -380,7 +422,6 @@ sub register_tags {
 sub image_by_name {
     my ($self, $name, $method) = @_;
     $method ||= 'url';
-
     my @found = grep { $name eq $_->source_file->basename } @{$self->images};
     if (@found == 1) {
         return $self->relative_root.$found[0]->$method;
