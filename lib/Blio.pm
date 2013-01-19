@@ -177,7 +177,7 @@ sub collect {
 
 sub write {
     my $self = shift;
-    
+
     while (my ($url, $node) = each %{$self->nodes_by_url}) {
         say "writing $url" unless $self->quiet;
         if ($node->paged_list) {

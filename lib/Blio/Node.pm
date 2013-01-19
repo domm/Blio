@@ -243,16 +243,19 @@ sub write_paged_list {
     my $utime=0;
     my @page;
     foreach my $i (0 .. $#{$list}) {
-        say $list->[$i];
-        if ($i>0 && $i % $items_per_page == 0) {
+        if (($i>0 && $i % $items_per_page == 0) || ($i == $#{$list})) {
             # write this page
+            my $data = {
+                node=>$self,
+                page=>\@page,
+                blio=>$blio,
+                base=>$self->relative_root,
+            };
+            $data->{prev} = sprintf("%s_%i.html",$self->id, $current_page-1) if $current_page > 1;
+            $data->{prev} = $self->url if $current_page==2;
+            $data->{next} = sprintf("%s_%i.html",$self->id, $current_page+1) if $list->[$i+1];
             $tt->process($self->template,
-                {
-                    node=>$self,
-                    page=>\@page,
-                    blio=>$blio,
-                    base=>$self->relative_root,
-                },
+                $data,
                 ,$outfile->relative($blio->output_dir)->stringify,
                 binmode => ':utf8',
             ) || die $tt->error;
