@@ -19,6 +19,9 @@ my $builder = Module::Build->new(
         'DateTime::Format::ISO8601'=>'0.07',
         'Markup::Unified'=>'0.03',
         'XML::Atom::SimpleFeed'=>'0.86',
+        'DateTime::Format::RFC3339'=>'0',
+        'MooseX::SimpleConfig'=>'0.09',
+        'Config::Tiny'=>'2.14',
     },
     build_requires=>{
         'Test::Most'=>'0.23',
