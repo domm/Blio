@@ -305,6 +305,18 @@ sub sorted_children {
     return \@sorted;
 }
 
+sub sort_children_by {
+    my ($self, $order_by, $limit) = @_;
+    my @sorted =
+        map { $_->[0] }
+        sort { $a->[1] cmp $b->[1] }
+        map { [$_ => lc($_->$order_by)] } @{$self->children};
+    if ($limit && $limit < @sorted) {
+        @sorted = splice(@sorted,0,$limit);
+    }
+    return \@sorted;
+}
+
 sub sorted_images {
     my $self = shift;
     my @sorted = 
