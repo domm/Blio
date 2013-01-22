@@ -235,7 +235,6 @@ sub write {
 sub write_paged_list {
     my ($self, $blio) = @_;
 
-    my $tt = $blio->tt;
     my $list = $self->sorted_children;
     my $items_per_page = $self->paged_list;
     my $current_page = 1;
@@ -243,37 +242,44 @@ sub write_paged_list {
     my $utime=0;
     my @page;
     foreach my $i (0 .. $#{$list}) {
-        if (($i>0 && $i % $items_per_page == 0) || ($i == $#{$list})) {
+        if ($i>0 && $i % $items_per_page == 0) {
             # write this page
-            my $data = {
-                node=>$self,
-                page=>\@page,
-                blio=>$blio,
-                base=>$self->relative_root,
-            };
-            $data->{prev} = sprintf("%s_%i.html",$self->id, $current_page-1) if $current_page > 1;
-            $data->{prev} = $self->url if $current_page==2;
-            $data->{next} = sprintf("%s_%i.html",$self->id, $current_page+1) if $list->[$i+1];
-            $tt->process($self->template,
-                $data,
-                ,$outfile->relative($blio->output_dir)->stringify,
-                binmode => ':utf8',
-            ) || die $tt->error;
+            $self->_write_page($blio, \@page, $current_page, $list, $outfile, $utime, $i);
 
             # start new page
             my $utime=0;
             @page=();
             $current_page++;
             $outfile = $blio->output_dir->file($self->id."_".$current_page.'.html');
-            utime($utime,$utime,$outfile->stringify);
         }
-
         push(@page, $list->[$i]);
         my $this_utime = $list->[$i]->date->epoch;
         $utime = $this_utime if $this_utime > $utime;
+        # write last page
+        $self->_write_page($blio, \@page, $current_page, $list, $outfile, $utime) if $i == $#{$list} ;
     }
 
     $self->write_feed($blio) if $self->feed;
+}
+
+sub _write_page {
+    my ($self, $blio, $page, $current_page, $list, $outfile, $utime, $i ) = @_;
+    my $tt = $blio->tt;
+    my $data = {
+        node=>$self,
+        page=>$page,
+        blio=>$blio,
+        base=>$self->relative_root,
+    };
+    $data->{prev} = sprintf("%s_%i.html",$self->id, $current_page-1) if $current_page > 1;
+    $data->{prev} = $self->url if $current_page==2;
+    $data->{next} = sprintf("%s_%i.html",$self->id, $current_page+1) if $i && $list->[$i+1];
+    $tt->process($self->template,
+        $data,
+        ,$outfile->relative($blio->output_dir)->stringify,
+        binmode => ':utf8',
+    ) || die $tt->error;
+    utime($utime,$utime,$outfile->stringify);
 }
 
 sub relative_root {
