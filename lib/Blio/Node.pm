@@ -54,6 +54,7 @@ has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
 has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
 has 'paged_list' => (is=>'ro',isa=>'Int',default=>0);
+has 'prev_next_nav' => (is=>'ro',isa=>'Int',default=>0);
 
 has 'raw_content'      => ( is => 'rw', isa => 'Str' );
 has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
@@ -457,6 +458,26 @@ sub image_by_index {
     my $img = $self->images->[$index - 1];
     return $self->relative_root.$img->$method if $img;
     return "cannot_resolve_image_index_".$index;
+}
+
+sub prev_next_post {
+    my $self = shift;
+    return unless my $p = $self->parent;
+    return unless $p->prev_next_nav;
+    my $siblings = $p->sorted_children;
+    my $hit;
+    my $i;
+    for ($i=0;$i<@$siblings;$i++) {
+        my $this = $siblings->[$i];
+        if ($this->id eq $self->id) {
+            $hit = $i;
+            last;
+        }
+    }
+    my %sib;
+    $sib{prev} = $siblings->[$i+1] if $i < $#{$siblings} && $siblings->[$i+1];
+    $sib{next} = $siblings->[$i-1] if ($i-1 >= 0 && $siblings->[$i-1]);
+    return \%sib;
 }
 
 __PACKAGE__->meta->make_immutable;
