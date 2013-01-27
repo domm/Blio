@@ -9,6 +9,7 @@ use Path::Class;
 use Path::Class::Iterator;
 use Template;
 use File::ShareDir qw(dist_dir);
+use DateTime;
 
 use Blio::Node;
 
@@ -58,8 +59,9 @@ has 'site_author' => (is=>'ro',isa=>'Str',required=>0);
 has 'language' => (is=>'ro',isa=>'Str',default=>'en',required=>1);
 has 'converter' => (is=>'ro',isa=>'Maybe[Str]',default=>undef,required=>1);
 has 'thumbnail' => (is=>'ro',isa=>'Int',default=>300,required=>1);
-
 has 'tags' => (is=>'ro',isa=>'Bool',default=>0);
+has 'schedule' => (is=>'ro',isa=>'Bool',default=>0);
+
 has 'force' => (is=>'ro',isa=>'Bool',default=>0);
 has 'quiet' => (is=>'ro',isa=>'Bool',default=>0);
 
@@ -134,12 +136,19 @@ sub collect {
         breadth_first => 1,
     );
 
+    my $schedule = $self->schedule;
+    my $now = DateTime->now;
+
     until ( $iterator->done ) {
         my $file = $iterator->next;
         next if -d $file;
         next unless $file =~ /\.txt$/;
 
         my $node = Blio::Node->new_from_file( $self, $file );
+        if ($schedule && $node->date > $now) {
+            say "skipping ".$node->id." (scheduled for ".$node->date." but now is ".$now.")";
+            next;
+        }
         $self->nodes_by_url->{ $node->url } = $node;
 
         if ( $node->source_file->parent->stringify eq
