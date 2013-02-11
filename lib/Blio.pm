@@ -155,6 +155,9 @@ sub collect {
             }
             else {
                 say "Cannot find parent, but not a root node: " . $node->url;
+                say "For each subdirectoy, you need a file in the parent directory";
+                say "with the name of the subdirectory and .txt extension";
+                say "Need a file called " . $node->source_file->parent->stringify . '.txt';
                 exit 0;
             }
         }
@@ -187,3 +190,126 @@ sub write {
 
 __PACKAGE__->meta->make_immutable;
 1;
+
+=head1 NAME
+
+Blio - The static blog engine of domm
+
+=head1 ARTICLES
+
+=over 4
+
+=item 2013.01.20
+
+L<Blio updates|http://domm.plix.at/perl/2013_01_blio_updates.html>
+
+=item 2012.09.11
+
+L<Some new Blio features|http://domm.plix.at/perl/2012_09_11_some_new_blio_features.html>
+
+=item 2012.08.09
+
+L<Blio - my blogging "engine"|http://domm.plix.at/perl/2012_08_09_blio_my_blogging_engine.html>
+
+=back
+
+=head1 CONFIGURATION
+
+The configuration parameters can be provided either in the configuration file that defauts to blio.ini
+or on the command line.
+
+The configuration file can look like this:
+
+  name=Test site
+  source_dir=src/
+  output_dir=.
+  template_dir=templates/
+
+The configureation file must exists.
+Otherwise you will get a warning like this:
+
+  Specified configfile 'blio.ini' does not exist, is empty, or is not readable
+
+If no source_dir provided or there is no src/ directory, you get this exception:
+
+  Can't call method "done" on an undefined value at .../Blio.pm line 137.
+
+=over 4
+
+=item name
+
+The name of the site in the title of the pages. Default to Blio
+
+=item source_dir
+
+The directory where the source files are. Each page of the site has a corresponding source file with .txt extension.
+Defaults to the C<src/> directory relative to the current working directory where your run the C<build.pl> script.
+
+=item output_dir
+
+Directory where the generated html files should go. Defaults to C<out/> relative to the current working directory.
+
+=item template_dir
+
+The location of the template files. Defaults to C<templates/> relative to the current working directory.
+As a fallback, there is a set of templates provided by Blio. They come in the share/templates directory of
+the distribution and are installed along the module.
+
+=item site_url
+
+=item site_author
+
+=item language
+
+Defaults to C<en>
+
+=item converter
+
+=item thumbnail
+
+Defaults to 300.
+
+=back
+
+TODO - there are more fields that need explanation.
+
+=head2 Source directory hierarchy
+
+The source directory defined using the C<source_dir> paramater can havs subdirectories, but each subdirectory needs
+a 'parent' page. The name of the parent page is the same as the name of the subdirectory with the additional .txt
+extentsion. So if you'd like to have a C<src/project/>  subdriectory, you also need to have a page called
+C<src/project.txt>.
+
+If there is no index.txt in the src/ directory, Blio will generate a default index.html file.
+This is not the case with subdirectories.
+
+
+=head2 Source files
+
+Each source file has a txt extension. It has several lines of header and a body.
+The module that represents each file is L<Blio::Node>.
+
+  title: The Project
+  date: 2013-02-10T00:27:53
+  language: en
+  converter: textile
+  tags: Perl
+
+  This is the project page.
+
+The only required entry in the header is the C<title>.
+
+TODO - there are more fields that need explanation.
+
+=head1 AUTHOR
+
+Thomas Klausner, <domm@cpan.org>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2013 Thomas Klausner
+
+This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut
+
