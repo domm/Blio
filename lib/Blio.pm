@@ -108,6 +108,7 @@ has 'tagindex' => (
     is=>'rw',
     isa=>'Blio::Node',
     lazy_build=>1,
+    traits  => [ 'NoGetopt' ],
 );
 sub _build_tagindex {
     my $self = shift;
