@@ -52,3 +52,12 @@ sub make_thumbnail {
 
 __PACKAGE__->meta->make_immutable;
 1;
+
+__END__
+
+A Blio Image.
+
+See L<blio.pl> for more info.
+
+more docs pending...
+

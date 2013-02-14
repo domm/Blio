@@ -204,3 +204,12 @@ sub write {
 
 __PACKAGE__->meta->make_immutable;
 1;
+
+__END__
+
+=head1 SYNOPSIS
+
+Backend for the C<blio.pl> command. See L<blio.pl> and/or C<perldoc blio.pl> for details.
+
+more docs pending...
+

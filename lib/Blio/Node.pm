@@ -485,3 +485,12 @@ sub prev_next_post {
 
 __PACKAGE__->meta->make_immutable;
 1;
+
+__END__
+
+A Blio Node.
+
+See L<blio.pl> for more info.
+
+more docs pending...
+
