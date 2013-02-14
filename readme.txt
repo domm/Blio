@@ -1,12 +1,14 @@
-Blio - domm's blogging "engine"
+Blio - domms blogging "engine"
 
 See http://domm.plix.at/perl/2012_08_09_blio_my_blogging_engine.html
 for some first thoughts on this fine pice of software.
 
+See all my posts on Blio here:
+http://domm.plix.at/tags/Blio.html
+
 TODO:
 
 - documentation!!
-- use distzilla
 - autogenerate readme via distzilla, see
   http://babyl.dyndns.org/techblog/entry/dist-zilla-github
 - delete a node:
@@ -14,9 +16,6 @@ TODO:
   server. the idea is to first set a node to deleted (via a new header field
   'delete') & commit it. the next build than shall remove the rendered file
   (and all related images). Then git rm the node & commit again
-- add some scheduling
-  add a new header field ('scheduled'). during build, do not render nodes
-  where scheduled > now
 - write some blog posts on domm.plix.at about:
   - tagging
   - config file handling via MooseX::Config
