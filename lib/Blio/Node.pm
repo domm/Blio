@@ -1,4 +1,7 @@
 package Blio::Node;
+
+# ABSTRACT: A Blio Node
+
 use 5.010;
 use Moose;
 use namespace::autoclean;

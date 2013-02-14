@@ -1,6 +1,8 @@
 package Blio;
 use 5.010;
 
+# ABSTRACT: domms blogging "engine"
+
 our $VERSION = 2.001;
 
 use Moose;
