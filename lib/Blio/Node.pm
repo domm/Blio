@@ -425,7 +425,7 @@ sub register_tags {
             $tagnode = Blio::Node->new(
                 base_dir => $blio->source_dir,
                 source_file => $0,
-                id=>$tagid.'.html',
+                id=>"tags/".$tagid.'.html',
                 url=>"tags/$tagid.html",
                 title=>$tag,
                 date=>DateTime->new(year=>1980),
