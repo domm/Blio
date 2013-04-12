@@ -14,7 +14,7 @@ my $blio = testlib::blio('site1');
 
 $blio->collect;
 
-is(keys %{$blio->nodes_by_url},5,'5 nodes');
+is(keys %{$blio->nodes_by_url},6,'6 nodes');
 is(@{$blio->tree},3,'3 root nodes');
 
 my $books = $blio->nodes_by_url->{'books.html'};
