@@ -226,6 +226,10 @@ Blio - The static blog engine of domm
 
 =over 4
 
+=item 2013.03.28
+
+L<Building a static blog using Blio and Github|http://perl5maven.com/building-a-static-blog-using-blio-and-github>
+
 =item 2013.01.20
 
 L<Blio updates|http://domm.plix.at/perl/2013_01_blio_updates.html>
