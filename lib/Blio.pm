@@ -332,15 +332,5 @@ The only required entry in the header is the C<title>.
 
 TODO - there are more fields that need explanation.
 
-=head1 AUTHOR
-
-Thomas Klausner, <domm@cpan.org>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2013 Thomas Klausner
-
-This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
-
 =cut
 
