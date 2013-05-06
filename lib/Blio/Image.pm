@@ -55,9 +55,49 @@ __PACKAGE__->meta->make_immutable;
 
 __END__
 
-A Blio Image.
+=head1 SYNOPSIS
 
-See L<blio.pl> for more info.
+ my $image_node = Blio::Image->new(
+     base_dir    => $blio->source_dir,
+     source_file => 'relative/path/to/image.jpg',
+ );
 
-more docs pending...
+ $image_node->make_thumbnail( $blio, 450 );
+ $image_node->publish( $blio );
+
+=head1 DESCRIPTION
+
+You probably won't need to use C<Blio::Image> directly.
+
+=attribute base_dir
+
+<Path::Class::Dir> object pointing to the L<source_dir> of this C<Blio> instance.
+
+=attribute source_file
+
+<Path::Class::File> object pointing to the source image file. The file format has to be supported by C<Imager>. I would strongly suggest using jpeg or png.
+
+=attribute url
+
+Relative <Path::Class::File> object pointing to the non-scaled image. This can be used in templates to link to the img.
+
+=attribute thumbnail
+
+Relative <Path::Class::File> object pointing to the thumbnailed image. This can be used in templates to link to the thumbnail.
+
+=method publish
+
+  $image_node->publish( $blio );
+
+Write the image file into the L<output_dir>. Create all directories that are needed.
+
+=method make_thumbnail
+
+ $image_node->make_thumbnail( $blio, $width );
+
+Generate a thumbnail image and store it in  L<output_dir>.
+
+If C<$width> is not passed in, the default width from C<$blio> is used.
+
+
 

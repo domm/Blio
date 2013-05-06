@@ -218,32 +218,6 @@ more docs pending...
 
 docs provided by gabor, need to be integrated:
 
-=head1 NAME
-
-Blio - The static blog engine of domm
-
-=head1 ARTICLES
-
-=over 4
-
-=item 2013.03.28
-
-L<Building a static blog using Blio and Github|http://perl5maven.com/building-a-static-blog-using-blio-and-github>
-
-=item 2013.01.20
-
-L<Blio updates|http://domm.plix.at/perl/2013_01_blio_updates.html>
-
-=item 2012.09.11
-
-L<Some new Blio features|http://domm.plix.at/perl/2012_09_11_some_new_blio_features.html>
-
-=item 2012.08.09
-
-L<Blio - my blogging "engine"|http://domm.plix.at/perl/2012_08_09_blio_my_blogging_engine.html>
-
-=back
-
 =head1 CONFIGURATION
 
 The configuration parameters can be provided either in the configuration file that defauts to blio.ini
@@ -290,15 +264,9 @@ the distribution and are installed along the module.
 
 =item site_author
 
-=item language
-
-Defaults to C<en>
-
 =item converter
 
 =item thumbnail
-
-Defaults to 300.
 
 =back
 
