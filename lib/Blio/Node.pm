@@ -58,6 +58,7 @@ has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
 has 'paged_list' => (is=>'ro',isa=>'Int',default=>0);
 has 'prev_next_nav' => (is=>'ro',isa=>'Int',default=>0);
+has 'list_image' => (is=>'ro',isa=>'Str');
 
 has 'raw_content'      => ( is => 'rw', isa => 'Str' );
 has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
