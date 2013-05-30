@@ -76,7 +76,7 @@ sub _build_content {
         $raw_content=~s/<blioimg#(\d+)>/$self->call_on_image_by_index($1,'url')/ge;
     }
 
-    no if $] >= 5.018, "experimental::smartmatch"; # TODO # why, oh, why???
+    no if $] >= 5.018, 'warnings', "experimental::smartmatch"; # TODO # why, oh, why???
     given ($converter) {
         when ('html') { return $raw_content }
         when ([qw(textile markdown bbcode)]) {
