@@ -68,11 +68,11 @@ sub _build_content {
     return $raw_content unless $converter;
 
     if ($self->inline_images) {
-        $raw_content=~s/<bliothumb:(.*?)>/$self->image_by_name($1,'thumbnail')/ge;
-        $raw_content=~s/<blioimg:(.*?)>/$self->image_by_name($1,'url')/ge;
+        $raw_content=~s/<bliothumb:(.*?)>/$self->call_on_image_by_name($1,'thumbnail')/ge;
+        $raw_content=~s/<blioimg:(.*?)>/$self->call_on_image_by_name($1,'url')/ge;
 
-        $raw_content=~s/<bliothumb#(\d+)>/$self->image_by_index($1,'thumbnail')/ge;
-        $raw_content=~s/<blioimg#(\d+)>/$self->image_by_index($1,'url')/ge;
+        $raw_content=~s/<bliothumb#(\d+)>/$self->call_on_image_by_index($1,'thumbnail')/ge;
+        $raw_content=~s/<blioimg#(\d+)>/$self->call_on_image_by_index($1,'url')/ge;
     }
 
     given ($converter) {
@@ -445,22 +445,31 @@ sub register_tags {
 }
 
 sub image_by_name {
+    my ($self, $name) = @_;
+    my @found = grep { $name eq $_->source_file->basename } @{$self->images};
+    return $found[0] if @found == 1;
+    return;
+}
+
+sub call_on_image_by_name {
     my ($self, $name, $method) = @_;
     $method ||= 'url';
-    my @found = grep { $name eq $_->source_file->basename } @{$self->images};
-    if (@found == 1) {
-        return $self->relative_root.$found[0]->$method;
-    }
-    return "cannot_resolve_image_".$name."_found_".scalar @found;
+    my $img = $self->image_by_name($name);
+    return "cannnot_resolve_image_$name" unless $img;
+    return $self->relative_root . $img->$method;
 }
 
 sub image_by_index {
-    my ($self, $index, $method) = @_;
-    $method ||= 'url';
+    my ($self, $index) = @_;
 
-    my $img = $self->images->[$index - 1];
-    return $self->relative_root.$img->$method if $img;
-    return "cannot_resolve_image_index_".$index;
+    return $self->images->[$index - 1];
+}
+
+sub call_on_image_by_index {
+    my ($self, $index, $method) = @_;
+    my $img = $self->image_by_index($index);
+    return "cannnot_resolve_image_$index" unless $img;
+    return $self->relative_root . $img->$method;
 }
 
 sub prev_next_post {
