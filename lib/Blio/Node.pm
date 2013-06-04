@@ -474,6 +474,16 @@ sub call_on_image_by_index {
     return $self->relative_root . $img->$method;
 }
 
+sub primary_image {
+    my $self = shift;
+    my $img;
+    if ($self->list_image) {
+        $img = $self->image_by_name( $self->list_image);
+    }
+    $img ||= $self->sorted_images->[0];
+    return $img;
+}
+
 sub prev_next_post {
     my $self = shift;
     return unless my $p = $self->parent;
