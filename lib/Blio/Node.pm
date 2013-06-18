@@ -338,7 +338,7 @@ sub sorted_images {
     return \@sorted;
 }
 
-sub teaser {
+sub teaser { # TODO enable simple "--fold--" syntax
     my ($self, $length) = @_;
     return unless $self->raw_content;
     $length ||= 200;
