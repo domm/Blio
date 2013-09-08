@@ -157,14 +157,16 @@ sub new_from_file {
 
     # check and add single image
     my $single_image = $file->basename;
-    $single_image =~ s/\.txt$/.jpg/i;
-    my $single_image_file = $file->parent->file($single_image);
-    if (-e $single_image_file) {
-        my $img = Blio::Image->new(
-            base_dir    => $blio->source_dir,
-            source_file => $single_image_file,
-        );
-        $node->add_image($img);
+    foreach my $ext (qw(jpg jpeg png)) {
+        $single_image =~ s/\.txt$/.$ext/i;
+        my $single_image_file = $file->parent->file($single_image);
+        if (-e $single_image_file) {
+            my $img = Blio::Image->new(
+                base_dir    => $blio->source_dir,
+                source_file => $single_image_file,
+            );
+            $node->add_image($img);
+        }
     }
 
     # check and add images dir
@@ -506,6 +508,29 @@ sub prev_next_post {
 
 __PACKAGE__->meta->make_immutable;
 1;
+
+=pod
+
+=head1 NAME
+
+Blio::Node - A Blio Node
+
+=head1 VERSION
+
+version 2.002
+
+=head1 AUTHOR
+
+Thomas Klausner <domm@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2013 by Thomas Klausner.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
 
 __END__
 
