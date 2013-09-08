@@ -157,14 +157,16 @@ sub new_from_file {
 
     # check and add single image
     my $single_image = $file->basename;
-    $single_image =~ s/\.txt$/.jpg/i;
-    my $single_image_file = $file->parent->file($single_image);
-    if (-e $single_image_file) {
-        my $img = Blio::Image->new(
-            base_dir    => $blio->source_dir,
-            source_file => $single_image_file,
-        );
-        $node->add_image($img);
+    foreach my $ext (qw(jpg jpeg png)) {
+        $single_image =~ s/\.txt$/.$ext/i;
+        my $single_image_file = $file->parent->file($single_image);
+        if (-e $single_image_file) {
+            my $img = Blio::Image->new(
+                base_dir    => $blio->source_dir,
+                source_file => $single_image_file,
+            );
+            $node->add_image($img);
+        }
     }
 
     # check and add images dir
