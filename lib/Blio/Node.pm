@@ -156,8 +156,8 @@ sub new_from_file {
     $node->register_tags($blio, $tags) if $tags && $blio->tags;
 
     # check and add single image
-    my $single_image = $file->basename;
     foreach my $ext (qw(jpg jpeg png)) {
+        my $single_image = $file->basename;
         $single_image =~ s/\.txt$/.$ext/i;
         my $single_image_file = $file->parent->file($single_image);
         if (-e $single_image_file) {
