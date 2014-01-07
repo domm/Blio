@@ -344,13 +344,10 @@ sub teaser { # TODO enable simple "--fold--" syntax
     my ($self, $length) = @_;
     return unless $self->raw_content;
     $length ||= 200;
-
     my $teaser;
     if ($length =~ /^\d+$/) {
         $teaser = $self->content;
-        $teaser =~ s/<a href(.*?)>//g;
-        $teaser =~ s{</a>}{}g;
-        $teaser =~ s{<img(.*?)>}//g;
+        $teaser =~ s{</?(.*?)>}{}g;
         $teaser = substr($teaser,0,$length);
         $teaser =~s/\s\S+$/ .../;
     }
