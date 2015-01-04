@@ -303,7 +303,7 @@ sub relative_root {
 sub possible_parent_url {
     my $self = shift;
     my $ppurl = $self->url;
-    $ppurl =~ s{/\w+.html$}{.html};
+    $ppurl =~ s{/[\-\w]+.html$}{.html};
     return $ppurl;
 }
 
