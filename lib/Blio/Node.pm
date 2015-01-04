@@ -374,7 +374,7 @@ sub write_feed {
     my $rfc3339 = DateTime::Format::RFC3339->new();
 
     my $feed = XML::Atom::SimpleFeed->new(
-        title=>decode_utf8($self->title || 'no title'),
+        title=>$self->title || 'no title',
         author=>$blio->site_author || $0,
         link=>{
             href=>$site_url.$self->feed_url,
@@ -386,22 +386,27 @@ sub write_feed {
 
     foreach my $child (@$children) {
         next unless $child->parent;
-        my @entry = (
-            title=>decode_utf8($child->title || 'no title'),
-            link=>$site_url.$child->url,
-            id=>$site_url.$child->url,
-            updated=>$rfc3339->format_datetime($child->date),
-            category=>$child->parent->id,
-            summary=>decode_utf8($child->teaser || ' '),
-            content=>decode_utf8($child->content),
-        );
-        push (@entry,author => $self->author) if $self->author;
-        if ($child->has_tags) {
-            foreach my $tag (@{$child->tags}) {
-                push (@entry, category => $tag->title);
+        eval {
+            my @entry = (
+                title=>$child->title || 'no title',
+                link=>$site_url.$child->url,
+                id=>$site_url.$child->url,
+                updated=>$rfc3339->format_datetime($child->date),
+                category=>$child->parent->id,
+                summary=>($child->teaser || ' '),
+                content=>$child->content,
+            );
+            push (@entry,author => $self->author) if $self->author;
+            if ($child->has_tags) {
+                foreach my $tag (@{$child->tags}) {
+                    push (@entry, category => $tag->title);
+                }
             }
+            $feed->add_entry( @entry );
+        };
+        if ($@) {
+            say "ERR $@";
         }
-        $feed->add_entry( @entry );
     }
     my $feed_file = $blio->output_dir->file($self->feed_url);
     open(my $fh,'>:encoding(UTF-8)',$feed_file->stringify) || die "Cannot write to Atom feed file $feed_file: $!";
