@@ -1,5 +1,18 @@
 Changes Blio
 
+2.003   2015-01-04T23:11:11
+    - feed encoding issues (Thomas Klausner)
+    - allow dashes in urls (Thomas Klausner)
+    - remove all html from teaser (Thomas Klausner)
+    - fixed single-image scope bug (Thomas Klausner)
+    - also hanlde png (Thomas Klausner)
+    - added TODO for --fold-- (Thomas Klausner)
+    - added primary_image method (Thomas Klausner)
+    - added list_image to Node (Thomas Klausner)
+    - refactored image_by_name/index (Thomas Klausner)
+    - removed AUTHOR/COPYRIGHT (handled by distzilla) (Thomas Klausner)
+    - link to my article (Gabor Szabo)
+
 
 2.002   2013-05-02T16:07:26+0200
     - lots of new features etc, first CPAN release just in time

@@ -3,7 +3,7 @@ use 5.010;
 
 # ABSTRACT: domms blogging "engine"
 
-our $VERSION = 2.002;
+our $VERSION = 2.003;
 
 use Moose;
 use MooseX::Types::Path::Class;
