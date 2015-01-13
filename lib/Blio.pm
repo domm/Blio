@@ -63,6 +63,7 @@ has 'converter' => (is=>'ro',isa=>'Maybe[Str]',default=>undef,required=>1);
 has 'thumbnail' => (is=>'ro',isa=>'Int',default=>300,required=>1);
 has 'tags' => (is=>'ro',isa=>'Bool',default=>0);
 has 'schedule' => (is=>'ro',isa=>'Bool',default=>0);
+has 'time_zone' => (is=>'ro',isa=>'Str', default=>'UTC');
 
 has 'force' => (is=>'ro',isa=>'Bool',default=>0);
 has 'quiet' => (is=>'ro',isa=>'Bool',default=>0);
@@ -140,7 +141,7 @@ sub collect {
     );
 
     my $schedule = $self->schedule;
-    my $now = DateTime->now;
+    my $now = DateTime->now(time_zone=>$self->time_zone);
 
     until ( $iterator->done ) {
         my $file = $iterator->next;
