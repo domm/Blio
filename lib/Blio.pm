@@ -12,6 +12,7 @@ use Path::Class::Iterator;
 use Template;
 use File::ShareDir qw(dist_dir);
 use DateTime;
+use MIME::Base64 qw(encode_base64url);
 
 use Blio::Node;
 
@@ -204,6 +205,16 @@ sub write {
         }
     }
 
+}
+
+sub absolute_url {
+    my ($self, $node) = @_;
+    return $self->site_url.'/'.$node->url;
+}
+
+sub absolute_base64_url {
+    my ($self, $node) = @_;
+    return encode_base64url($self->absolute_url($node));
 }
 
 __PACKAGE__->meta->make_immutable;
