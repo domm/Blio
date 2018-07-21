@@ -316,7 +316,12 @@ sub sorted_children {
     if ($limit && $limit < @sorted) {
         @sorted = splice(@sorted,0,$limit);
     }
-    return \@sorted;
+    if ($self->stash->{reverse_children}) {
+        return [reverse @sorted];
+    }
+    else {
+        return \@sorted;
+    }
 }
 
 sub sort_children_by {
