@@ -81,7 +81,7 @@ sub _build_content {
         when ('html') { return $raw_content }
         when ([qw(textile markdown bbcode)]) {
             my $o = Markup::Unified->new();
-            return $o->format($raw_content, 'textile')->formatted;
+            return $o->format($raw_content, $converter)->formatted;
         }
         default {
             my $method = 'convert_'.$converter;
