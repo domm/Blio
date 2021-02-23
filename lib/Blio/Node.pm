@@ -57,7 +57,6 @@ has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
 has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
 has 'paged_list' => (is=>'ro',isa=>'Int',default=>0);
-has 'prev_next_nav' => (is=>'ro',isa=>'Int',default=>0);
 has 'list_image' => (is=>'ro',isa=>'Str');
 
 has 'raw_content'      => ( is => 'rw', isa => 'Str' );
@@ -133,6 +132,11 @@ has 'feed_url' => (is=>'ro',isa=>'Str',lazy_build=>1);
 sub _build_feed_url {
     my $self = shift;
     return $self->id.'.xml';
+}
+
+sub is_list {
+    my $self = shift;
+    return $self->feed;
 }
 
 sub new_from_file {
@@ -496,7 +500,6 @@ sub primary_image {
 sub prev_next_post {
     my $self = shift;
     return unless my $p = $self->parent;
-    return unless $p->prev_next_nav;
     my $siblings = $p->sorted_children;
     my $hit;
     my $i;
