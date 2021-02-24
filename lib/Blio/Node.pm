@@ -55,6 +55,7 @@ sub _build_date {
 has 'language' => (is=>'ro', isa=>'Maybe[Str]');
 has 'converter' => (is=>'ro', isa=>'Maybe[Str]');
 has 'feed' => (is=>'ro',isa=>'Bool',default=>0);
+has 'list' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
 has 'paged_list' => (is=>'ro',isa=>'Int',default=>0);
 has 'list_image' => (is=>'ro',isa=>'Str');
@@ -136,7 +137,7 @@ sub _build_feed_url {
 
 sub is_list {
     my $self = shift;
-    return $self->feed;
+    return $self->list || $self->feed;
 }
 
 sub new_from_file {

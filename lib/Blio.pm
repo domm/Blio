@@ -3,7 +3,7 @@ use 5.010;
 
 # ABSTRACT: domms blogging "engine"
 
-our $VERSION = 2.003;
+our $VERSION = 2.004;
 
 use Moose;
 use MooseX::Types::Path::Class;
@@ -122,6 +122,7 @@ sub _build_tagindex {
         title=>'Tags',
         date=>DateTime->now,
         content=>'',
+        list=>1,
     );
     $self->nodes_by_url->{'tags.html'}=$tagindex;
     return $tagindex;
