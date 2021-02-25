@@ -446,6 +446,9 @@ sub register_tags {
                 title=>$tag,
                 date=>DateTime->new(year=>1980),
                 content=>'',
+                stash=>{
+                    is_tag=>1,
+                }
             );
             $blio->nodes_by_url->{$tagnode->url} = $tagnode;
             $tagnode->parent($tagindex);
