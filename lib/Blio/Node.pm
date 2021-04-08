@@ -59,6 +59,7 @@ has 'list' => (is=>'ro',isa=>'Bool',default=>0);
 has 'author' => (is=>'ro',isa=>'Str');
 has 'paged_list' => (is=>'ro',isa=>'Int',default=>0);
 has 'list_image' => (is=>'ro',isa=>'Str');
+has 'list_only' => (is=>'ro',isa=>'Bool',default=>0);
 
 has 'raw_content'      => ( is => 'rw', isa => 'Str' );
 has 'content' => ( is => 'rw', isa => 'Str', lazy_build=>1 );
@@ -209,6 +210,7 @@ sub parse {
 
 sub write {
     my ($self, $blio) = @_;
+    return if $self->list_only;
 
     my $tt = $blio->tt;
     my $outfile = $blio->output_dir->file($self->url);
