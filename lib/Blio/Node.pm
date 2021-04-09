@@ -522,6 +522,25 @@ sub prev_next_post {
     return \%sib;
 }
 
+sub older_younger {
+    my $self = shift;
+    return unless my $p = $self->parent;
+    my $siblings = $p->sorted_children;
+    my $hit;
+    my $i;
+    for ($i=0;$i<@$siblings;$i++) {
+        my $this = $siblings->[$i];
+        if ($this->id eq $self->id) {
+            $hit = $i;
+            last;
+        }
+    }
+    my %sib;
+    $sib{older} = $siblings->[$i+1] if $i < $#{$siblings} && $siblings->[$i+1];
+    $sib{younger} = $siblings->[$i-1] if ($i-1 >= 0 && $siblings->[$i-1]);
+    return \%sib;
+}
+
 __PACKAGE__->meta->make_immutable;
 1;
 
