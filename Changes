@@ -1,5 +1,12 @@
 Changes Blio
 
+2.004   2020-11-30T18:31:50
+    - actually use the configured converter.. (Thomas Klausner)
+    - reverse_children option (Thomas Klausner)
+    - add blio->absolute_base64_url helper (Thomas Klausner)
+    - add time_zone support to schedule (Thomas Klausner)
+
+
 2.003   2015-01-04T23:11:11
     - feed encoding issues (Thomas Klausner)
     - allow dashes in urls (Thomas Klausner)
