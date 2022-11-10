@@ -3,7 +3,7 @@ use 5.010;
 
 # ABSTRACT: domms blogging "engine"
 
-our $VERSION = 2.005;
+our $VERSION = 2.006;
 
 use Moose;
 use MooseX::Types::Path::Class;
@@ -68,6 +68,7 @@ has 'time_zone' => (is=>'ro',isa=>'Str', default=>'UTC');
 
 has 'force' => (is=>'ro',isa=>'Bool',default=>0);
 has 'quiet' => (is=>'ro',isa=>'Bool',default=>0);
+has 'recent' => (is=>'ro',isa=>'Bool',default=>0);
 
 has 'nodes_by_url' => ( is => 'ro', isa => 'HashRef', default => sub { {} } ,traits  => [ 'NoGetopt' ]);
 has 'tree' => (
@@ -196,16 +197,46 @@ sub collect {
 sub write {
     my $self = shift;
 
-    while (my ($url, $node) = each %{$self->nodes_by_url}) {
-        say "writing $url" unless $self->quiet;
-        if ($node->paged_list) {
-            $node->write_paged_list($self);
-        }
-        else {
-            $node->write($self);
-        }
+    for my $node (values %{$self->nodes_by_url}) {
+        $self->_write($node);
+    }
+}
+
+sub write_tree_up {
+    my ($self, $node) = @_;
+
+    $self->_write($node);
+    my $siblings = $node->older_younger;
+    for my $sib (values %$siblings) {
+        $sib->date($node->date);
+        $self->_write($sib);
     }
 
+    if (my $p = $node->parent) {
+        $p->date($node->date);
+        $self->write_tree_up($p);
+    }
+}
+
+sub write_tree_down {
+    my ($self, $node) = @_;
+
+    $self->_write($node);
+    for my $child ($node->children->@*) {
+        $self->write_tree_down($child);
+    }
+}
+
+
+sub _write {
+    my ($self, $node) = @_;
+    say "writing ".$node->url unless $self->quiet;
+    if ($node->paged_list) {
+        $node->write_paged_list($self);
+    }
+    else {
+        $node->write($self);
+    }
 }
 
 sub absolute_url {
