@@ -2,6 +2,10 @@ Changes Blio
 
 {{$NEXT}}
 
+2.007     2022-11-11 21:14:31+01:00
+    - update dist to use my Dist::Zilla plugin Author::DOMM
+
+
 2.006  2022-11-10T17:23:24
     - change node->feed to rw so we can set feed for tags during build (Thomas Klausner)
       this allows me to have an RSS feed for selected tags, eg
