@@ -2,8 +2,9 @@
 use strict;
 use warnings;
 
-# ABSTRACT: Set up & manage a Blio instance
+# ABSTRACT: Set up & manage a Blio instance - NOT IMPLEMENTED
 # PODNAME: blio_meta.pl
+# VERSION
 
 die "not implemented yet"
 

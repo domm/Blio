@@ -2,6 +2,8 @@ package Blio::Image;
 
 # ABSTRACT: An image node
 
+# VERSION
+
 use 5.010;
 use Moose;
 use namespace::autoclean;

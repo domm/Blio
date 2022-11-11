@@ -5,6 +5,7 @@ use Blio;
 
 # ABSTRACT: Blio - domm's blogging "engine"
 # PODNAME: blio.pl
+# VERSION
 
 Blio->new_with_options->run;
 
