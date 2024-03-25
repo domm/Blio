@@ -208,8 +208,7 @@ sub write_tree_up {
     $self->_write($node);
     my $siblings = $node->older_younger;
     for my $sib (values %$siblings) {
-        $sib->date($node->date);
-        $self->_write($sib);
+        $self->_write($sib, $node->date);
     }
 
     if (my $p = $node->parent) {
@@ -229,13 +228,13 @@ sub write_tree_down {
 
 
 sub _write {
-    my ($self, $node) = @_;
+    my ($self, $node, $utime) = @_;
     say "writing ".$node->url unless $self->quiet;
     if ($node->paged_list) {
         $node->write_paged_list($self);
     }
     else {
-        $node->write($self);
+        $node->write($self, $utime);
     }
 }
 

@@ -211,7 +211,7 @@ sub parse {
 }
 
 sub write {
-    my ($self, $blio) = @_;
+    my ($self, $blio, $utime) = @_;
     return if $self->list_only;
 
     my $tt = $blio->tt;
@@ -228,13 +228,13 @@ sub write {
         binmode => ':utf8',
     ) || die $tt->error;
 
-    my $utime = $self->date->epoch;
+    my $utime_ep = $utime ? $utime->epoch : $self->date->epoch;
     if ($self->has_children) {
         my $children = $self->sorted_children;
         my $child_utime = $children->[0]->date->epoch;
-        $utime = $child_utime if $child_utime > $utime;
+        $utime_ep = $child_utime if $child_utime > $utime_ep;
     }
-    utime($utime,$utime,$outfile->stringify);
+    utime($utime_ep,$utime_ep,$outfile->stringify);
 
     if ($self->has_images) {
         foreach my $img (@{$self->images}) {
