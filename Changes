@@ -1,6 +1,8 @@
 Changes Blio
 
 {{$NEXT}}
+
+2.008     2024-10-20 20:44:03+02:00
     - define perl 5.24 as minimum version (#7, reported by Slaven Rezić)
     - remove given/when (#8, reported by Slaven Rezić)
     - override utime for write_tree_up/sibling
