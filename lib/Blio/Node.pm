@@ -80,9 +80,8 @@ sub _build_content {
         $raw_content=~s/<blioimg#(\d+)>/$self->call_on_image_by_index($1,'url')/ge;
     }
 
-    no if $] >= 5.018, 'warnings', "experimental::smartmatch"; # TODO # why, oh, why???
     if ($converter eq 'html') {
-        return $raw_content
+        return $raw_content;
     }
     elsif (any { $converter eq $_ } qw(textile markdown bbcode)) {
         my $o = Markup::Unified->new();
