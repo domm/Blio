@@ -1,5 +1,5 @@
 package Blio;
-use 5.010;
+use v5.24;
 
 # ABSTRACT: domms blogging "engine"
 

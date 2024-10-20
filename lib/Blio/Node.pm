@@ -4,7 +4,7 @@ package Blio::Node;
 
 # VERSION
 
-use 5.010;
+use v5.24;
 use Moose;
 use namespace::autoclean;
 use MooseX::Types::Path::Class;
