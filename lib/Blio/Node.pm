@@ -15,6 +15,7 @@ use Markup::Unified;
 use Blio::Image;
 use XML::Atom::SimpleFeed;
 use DateTime::Format::RFC3339;
+use List::Util qw(any);
 
 class_type 'DateTime';
 coerce 'DateTime' => from 'Int' => via {
@@ -80,20 +81,20 @@ sub _build_content {
     }
 
     no if $] >= 5.018, 'warnings', "experimental::smartmatch"; # TODO # why, oh, why???
-    given ($converter) {
-        when ('html') { return $raw_content }
-        when ([qw(textile markdown bbcode)]) {
-            my $o = Markup::Unified->new();
-            return $o->format($raw_content, $converter)->formatted;
+    if ($converter eq 'html') {
+        return $raw_content
+    }
+    elsif (any { $converter eq $_ } qw(textile markdown bbcode)) {
+        my $o = Markup::Unified->new();
+        return $o->format($raw_content, $converter)->formatted;
+    }
+    else {
+        my $method = 'convert_'.$converter;
+        if ($self->can($method)) {
+            return $self->$method($raw_content);
         }
-        default {
-            my $method = 'convert_'.$converter;
-            if ($self->can($method)) {
-                return $self->$method($raw_content);
-            }
-            else {
-                return "<pre>No such converter: $converter</pre>".$raw_content;
-            }
+        else {
+            return "<pre>No such converter: $converter</pre>".$raw_content;
         }
     }
 }
