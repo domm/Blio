@@ -1,6 +1,10 @@
 Changes Blio
 
 {{$NEXT}}
+    - define perl 5.24 as minimum version (#7, reported by Slaven Rezić)
+    - remove given/when (#8, reported by Slaven Rezić)
+    - override utime for write_tree_up/sibling
+
 
 2.007     2022-11-11 21:14:31+01:00
     - update dist to use my Dist::Zilla plugin Author::DOMM
