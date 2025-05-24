@@ -4,7 +4,7 @@ Blio - domms blogging "engine"
 
 # VERSION
 
-version 2.008
+version 2.009
 
 # SYNOPSIS
 

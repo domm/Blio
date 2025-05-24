@@ -65,6 +65,7 @@ has 'thumbnail' => (is=>'ro',isa=>'Int',default=>300,required=>1);
 has 'tags' => (is=>'ro',isa=>'Bool',default=>0);
 has 'schedule' => (is=>'ro',isa=>'Bool',default=>0);
 has 'time_zone' => (is=>'ro',isa=>'Str', default=>'UTC');
+has 'images_as_nodes' => (is=>'ro',isa=>'Bool',default=>0);
 
 has 'force' => (is=>'ro',isa=>'Bool',default=>0);
 has 'quiet' => (is=>'ro',isa=>'Bool',default=>0);
