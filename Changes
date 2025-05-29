@@ -2,7 +2,8 @@ Changes Blio
 
 {{$NEXT}}
 
--    Added new option images_as_node which will generate a distinct HTML file (a node) for each image
+2.009     2025-05-29 20:31:16+02:00
+    - Added new option images_as_node which will generate a distinct HTML file (a node) for each image
 
 
 2.008     2024-10-20 20:44:03+02:00
