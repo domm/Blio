@@ -2,6 +2,9 @@ Changes Blio
 
 {{$NEXT}}
 
+-    Added new option images_as_node which will generate a distinct HTML file (a node) for each image
+
+
 2.008     2024-10-20 20:44:03+02:00
     - define perl 5.24 as minimum version (#7, reported by Slaven Rezić)
     - remove given/when (#8, reported by Slaven Rezić)
