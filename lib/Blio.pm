@@ -79,6 +79,13 @@ has 'tree' => (
     traits  => ['Array', 'NoGetopt'],
     handles => { add_top_node => 'push', },
 );
+has template_configuration => (
+    is => 'ro',
+    isa => 'HashRef',
+    default => sub { {} },
+    traits => ['Hash', 'NoGetopt'],
+    handles => { tt_config_override => 'elements' },
+);
 has 'tt' => (
     is=>'ro',
     isa=>'Template',
@@ -92,6 +99,7 @@ sub _build_tt {
         INCLUDE_PATH=>[$self->template_dir->stringify, dir(dist_dir('Blio'),'templates')->stringify],
         WRAPPER=>'wrapper.tt',
         ENCODING     => 'UTF8',
+        $self->tt_config_override,
     });
 }
 
