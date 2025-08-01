@@ -26,7 +26,7 @@ The configuration file can look like this:
     output_dir=.
     template_dir=templates/
 
-The configureation file must exists.
+The configuration file must exists.
 Otherwise you will get a warning like this:
 
     Specified configfile 'blio.ini' does not exist, is empty, or is not readable

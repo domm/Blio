@@ -124,7 +124,7 @@ The content can be generated using the common formatting languages supported by 
 
 =head1 INSTALLATION
 
-C<Blio> runs on L<Perl|http://perl.org> application, and thus requires a rencent Perl (>= 5.10). It also reuses a lot of code from L<CPAN|http://cpan.org>.
+C<Blio> runs on L<Perl|http://perl.org> application, and thus requires a rencent Perl (>= 5.24). It also reuses a lot of code from L<CPAN|http://cpan.org>.
 
 =head2 From CPAN
 
